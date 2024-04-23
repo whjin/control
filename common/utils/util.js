@@ -113,3 +113,8 @@ export const readDirectory = (dirPath) => {
     );
   });
 };
+
+export const currentPages = () => {
+  const pages = getCurrentPages();
+  return pages[pages.length - 1];
+};

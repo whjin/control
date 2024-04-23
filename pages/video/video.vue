@@ -115,8 +115,8 @@
                       <div class="table-content">
                         <div class="content-checkbox" @click="checkRoomChange(item, index)">
                           <common-icons :type="item.isSelectRoom
-                              ? 'iconcheckbox'
-                              : 'iconcheck-unselect'
+                            ? 'iconcheckbox'
+                            : 'iconcheck-unselect'
                             " color="#2A4273" size="24"></common-icons>
                         </div>
                         <div class="video-table-item" style="flex: 1">
@@ -282,6 +282,7 @@ import {
   uniqueArr,
   timeFormat,
   dateFormat,
+  currentPages
 } from "@/common/utils/util.js";
 import videoColumns from "@/static/mock/videoColumns.json";
 
@@ -374,7 +375,7 @@ export default {
     // 切换分机|分组列表
     handleTabChange(page) {
       if (this.videoState) {
-        this.$parent.handleShowToast("请先停止播放视频", "center", 5000);
+        currentPages().handleShowToast("请先停止播放视频", "center", 5000);
         return;
       }
       this.page = page;
@@ -463,7 +464,7 @@ export default {
     // 搜索分机监室
     searchTerminalRoom() {
       if (!this.searchTerminal) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchTerminal);
@@ -512,7 +513,7 @@ export default {
     // 搜索分组监室
     searchGroupRoom() {
       if (!this.searchGroup) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchGroup);
@@ -632,7 +633,7 @@ export default {
     // 预览视频
     previewVideo(e) {
       if (!Object.keys(this.videoInfo).length) {
-        this.$parent.handleShowToast("请先选择视频", "center");
+        currentPages().handleShowToast("请先选择视频", "center");
         return;
       }
       this.isPlay = !this.isPlay;
@@ -755,11 +756,11 @@ export default {
     // 打开分机弹框
     handleVideoModal() {
       if (!Object.keys(this.videoInfo).length) {
-        this.$parent.handleShowToast("请先选择视频", "center");
+        currentPages().handleShowToast("请先选择视频", "center");
         return;
       }
       if (!this.roomSelectList.length) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.showVideoConfirm = true;
@@ -795,14 +796,14 @@ export default {
         this.getVideoStatusInfo("200");
         this.getVideoStatusInfo("300");
         setTimeout(() => {
-          this.$parent.sendWebsocket(JSON.stringify(controlObj));
+          currentPages().sendWebsocket(JSON.stringify(controlObj));
           this.setDynamicInfo("400", `开始播放${this.prisonName}视频`);
         }, 0);
         setTimeout(() => {
           // 保存视频播放状态
           this.saveVideoPlayStatus("start");
         }, 1500);
-        this.$parent.stopLivePusher();
+        currentPages().stopLivePusher();
       } else {
         // 停止播放视频
         this.hanleStopVideo();
@@ -814,7 +815,7 @@ export default {
       let terminalCode = this.roomSelectList
         .map((item) => item.terminalCode)
         .toString();
-      this.$parent.sendWebsocket(
+      currentPages().sendWebsocket(
         `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"400",msg:"1"}`
       );
       this.setDynamicInfo("400", `停止播放${this.prisonName}视频`);
@@ -835,7 +836,7 @@ export default {
         // 刷新动态信息
         this.getDynamicInfo();
       } else {
-        this.$parent.handleShowToast("请求错误", "center");
+        currentPages().handleShowToast("请求错误", "center");
       }
     },
     // 保存视频播放状态
@@ -861,7 +862,7 @@ export default {
         params
       );
       if (res.state.code == 200) {
-        this.$parent.handleShowToast("保存状态成功", "bottom");
+        currentPages().handleShowToast("保存状态成功", "bottom");
       }
     },
     // 获取视频播放状态信息
@@ -953,7 +954,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"400",msg:"4",extend:"0"}`
         );
       } else {
@@ -964,7 +965,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"400",msg:"4",extend:"1"}`
         );
       }
@@ -972,7 +973,7 @@ export default {
     // 添加分组弹框
     handleAddGroup() {
       if (!this.roomSelectList.length) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.addGroupName = "";
@@ -985,7 +986,7 @@ export default {
     // 确认添加分组
     addGroupConfirm() {
       if (!this.addGroupName) {
-        this.$parent.handleShowToast("请输入分组名称", "center");
+        currentPages().handleShowToast("请输入分组名称", "center");
         return;
       }
       this.addGroup();
@@ -1027,7 +1028,7 @@ export default {
     // 确认修改分组名称
     modifyGroupConfirm() {
       if (!this.modifyGroupName) {
-        this.$parent.handleShowToast("请输入分组名称", "center");
+        currentPages().handleShowToast("请输入分组名称", "center");
         return;
       }
       this.$refs.vTree.groupChange = false;
@@ -1121,7 +1122,7 @@ export default {
         msg: "6",
         extend: { volumeList },
       };
-      this.$parent.sendWebsocket(JSON.stringify(controlObj));
+      currentPages().sendWebsocket(JSON.stringify(controlObj));
     },
     openModal(type) {
       this[`show${type}`] = true;

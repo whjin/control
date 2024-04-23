@@ -137,11 +137,12 @@ import controlSet from "@/pages/setting/setting.vue";
 import controlManager from "@/pages/manager/manager.vue";
 import controlCall from "@/pages/call/call.vue";
 import vAlarm from "@/components/v-alarm/v-alarm.vue";
-import { isNullStr, dateFormat } from "@/common/utils/util.js";
+import { isNullStr, dateFormat, currentPages } from "@/common/utils/util.js";
 import Log from "@/common/utils/log.js";
 import Api from "@/common/api.js";
 import { mapState, mapMutations, mapActions } from "vuex";
 import menuList from "@/static/mock/menuList.json";
+import { startLive } from "@/static/js/webrtc.js";
 
 export default {
   name: "bgMain",
@@ -201,8 +202,6 @@ export default {
       intercomType: 0,
       // 按键SIP信息
       deviceSipInfo: {},
-      // 校时时间
-      timing: null,
       // 是否收到心跳
       isHeartbeat: false,
       // 分机对讲信息
@@ -234,13 +233,13 @@ export default {
     }),
     // 主机IP
     controlIP() {
-      return (
-        getApp().globalData.Base.getIpAddress().ip || this.$config.controlIP
-      );
+      return this.$config.controlIP;
     },
   },
   onLoad() {
-    // 初始化配置-基础Url
+    this.reconnectCount = 0;
+    this.clickNums = 0;
+    //初始化配置-基础Url
     if (isNullStr(uni.getStorageSync("baseUrl"))) {
       this.baseUrl = this.$config.baseUrl;
       this.openModal("UrlConfig");
@@ -252,85 +251,17 @@ export default {
       // 同步配置信息
       this.configInfoSync();
       // 修改主机信息
-      this.setControlInfo();
+      // this.setControlInfo();
       // 获取未接来电信息
       this.getMissCallInfo();
 
-      // 初始化来邦服务
-      getApp().globalData.FloatUniModule.initIPCManager((e) => {
-        if (e.code == 0) {
-          this.setIPCState(true);
-          // 获取主机设备信息
-          getApp().globalData.FloatUniModule.getCurrentDeviceInfo((info) => {
-            console.log(info);
-            // 设备校时
-            if (this.timing) {
-              getApp().globalData.FloatUniModule.setSystemTime(this.timing);
-            }
-            getApp().globalData.FloatUniModule.hideTalkView(true);
-            // 监听来邦对讲事件
-            getApp().globalData.FloatUniModule.talkEventCallback((res) => {
-              console.log("对讲服务事件：" + JSON.stringify(res));
-              if (res.eventID == 1) {
-                // 呼出处理中
-              } else if (res.eventID == 2) {
-                // 呼出振铃
-              } else if (res.eventID == 3 || res.eventID == 4) {
-                // 3监听接通|4对讲接通
-                this.intercomType = 0;
-                getApp().globalData.FloatUniModule.hideTalkView(false);
-                this.intercomHandler(res);
-                if (res.eventID == 4 || this.callState) {
-                  getApp().globalData.FloatUniModule.listenToTalk();
-                  this.setDisableTab(true);
-                  this.intercomType = 1;
-                  this.voiceBroadcast("请注意，已经开启视频对讲");
-                }
-                if (res.devRegType == 8) {
-                  // 仓外屏对讲
-                  const { controlCode } = uni.getStorageSync("controlInfo");
-                  let managerCode = this.intercomInfo.terminalCode;
-                  this.sendWebsocket(
-                    `{maindevno:"${controlCode}",devno:"${managerCode}",type:"100",msg:"20"}`
-                  );
-                }
-              } else if (res.eventID == 5) {
-                // 通话或呼叫挂断
-                this.stopIntercom();
-              } else if (
-                res.eventID == 7 ||
-                res.eventID == 8 ||
-                res.eventID == 9
-              ) {
-                // 7-呼出失败|8-呼出失败|9-呼出超时无响应
-                this.cancelIntercom(res);
-              } else if (res.eventID == 10) {
-                // 接听主机
-                this.answerIntercom(res);
-              } else if (res.eventID == 268 || res.eventID == 11) {
-                // 268按键对讲|11按键报警
-                const { masterNum, slaveNum } = res;
-                this.deviceSipInfo = { masterNum, slaveNum };
-                this.getTerminalSipInfo(res.eventID, res.slaveNum);
-              } else if (res.eventID == 13) {
-                // 结束对讲监听
-                this.setTalkViewFail(res);
-              } else if (res.eventID == 103) {
-                // 防拆报警监听
-                this.cancelAlarm(res);
-              }
-            });
-          });
-        } else {
-          this.setIPCState(false);
-          this.handleShowToast("对讲服务已离线");
-        }
-      });
       //websocket连接
       if (!getApp().globalData.webSocketConnected) {
         if (!isNullStr(uni.getStorageSync("controlInfo").controlCode)) {
           //初始化配置WS服务
-          this.connectWebSocketInit(uni.getStorageSync("controlInfo").controlCode);
+          this.connectWebSocketInit(
+            uni.getStorageSync("controlInfo").controlCode
+          );
         } else {
           this.setAllBindInfo();
         }
@@ -341,6 +272,12 @@ export default {
         this.serveOfflineContent = msg;
       });
     }
+  },
+  mounted() {
+    // 获取摄像头权限
+    startLive();
+    // 连接RabbitMQ服务
+    this.connectServer();
   },
   destroyed() {
     clearInterval(this.alarmTimer);
@@ -374,8 +311,6 @@ export default {
       setTabList: "app/SET_TABLIST",
       // 设置菜单列表
       setMenuList: "app/SET_MENULIST",
-      // 来邦服务状态
-      setIPCState: "app/SET_IPCSTATE",
       // 设置禁止Tab切换
       setDisableTab: "app/SET_DISABLETAB",
     }),
@@ -385,16 +320,33 @@ export default {
       // 删除超时请求信息
       deleteOvertimeCall: "app/deleteOvertimeCall",
     }),
+    // 连接RabbitMQ服务
+    connectServer() {
+      const ws = new WebSocket("ws://localhost:15674/ws");
+      const client = Stomp.over(ws);
+
+      client.connect("admin", "admin", () => {
+        console.log("连接RabbitMQ成功！");
+        client.subscribe("/exchange/control_mq/control_msg", message => {
+          console.log("收到的数据：", message);
+        }, error => {
+          console.log("订阅主题失败", error);
+        });
+      }, err => {
+        console.log("连接RabbitMQ失败！", err);
+      });
+    },
     // 主机视频通话
     intercomHandler(res) {
       if (this.tagIndex == 42) {
         // 视频对讲中消息回传
-        let { page, checked, setDynamicInfo, monitorSelect } = this.$refs.intercom;
+        let { page, checked, setDynamicInfo, monitorSelect } =
+          this.$refs.intercom;
         if (res.eventID == 4 && !this.isPolling && !checked.managerType) {
           const { controlCode } = uni.getStorageSync("controlInfo");
           if (page == 0) {
             // 主机拨通分机消息
-            this.sendWebsocket(
+            currentPages().sendWebsocket(
               `{maindevno:"${controlCode}",devno:"${checked.terminalCode}",type:"100",msg:"12"}`,
               () => {
                 this.setTalkViewSuccess();
@@ -406,7 +358,7 @@ export default {
           } else {
             // 主机拨通主机消息
             if (this.callState) {
-              this.sendWebsocket(
+              currentPages().sendWebsocket(
                 `{maindevno:"${controlCode}",devno:"${checked.controlCode}",type:"100",msg:"17"}`,
                 () => {
                   this.setTalkViewSuccess();
@@ -458,12 +410,12 @@ export default {
           const devno = Reflect.has(this.intercomInfo, "controlCode")
             ? this.intercomInfo.controlCode
             : this.intercomInfo.terminalCode;
-          this.sendWebsocket(
+          currentPages().sendWebsocket(
             `{maindevno:"${controlCode}",devno:"${devno}",type:"100",msg:"1"}`
           );
         }
-        this.setDisableTab(false);
         this.$refs.intercom.stopIntercomHandler();
+        this.setDisableTab(false);
       }
     },
     // 接听视频通话
@@ -490,7 +442,7 @@ export default {
       } else {
         terminalCode = this.intercomInfo.terminalCode;
       }
-      this.sendWebsocket(
+      currentPages().sendWebsocket(
         `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"100",msg:"6"}`
       );
       if (this.tagIndex == 42) {
@@ -554,7 +506,8 @@ export default {
     // 重启应用
     handleRestartApp() {
       this.closeSocket();
-      getApp().globalData.Base.rebootApp("com.gksc.control");
+      // getApp().globalData.Base.rebootApp("com.gksc.control");
+      location.reload();
     },
     // 消息提示
     handleShowToast(title, position = "bottom", duration = 1500) {
@@ -594,7 +547,7 @@ export default {
         this.showSystemPwd = true;
       } else {
         if (this.clickNums == 2) {
-          this.handleShowToast("连续点击三次");
+          currentPages().handleShowToast("连续点击三次");
         }
         this.clickNums = this.clickNums + 1;
       }
@@ -619,7 +572,7 @@ export default {
       uni.showModal({
         title: "提示",
         content: "是否确定清除App所有数据存储缓存？",
-        success: res => {
+        success: (res) => {
           if (res.confirm) {
             uni.clearStorageSync();
             this.sysCacheInfo = "";
@@ -651,8 +604,8 @@ export default {
             uni.setStorageSync(`${key}`, x.svalue);
           }
         });
-        this.sysCacheInfo = "配置系统缓存成功！";
-        this.handleShowToast("配置系统缓存成功！");
+        this.sysCacheInfo = "配置系统缓存成功";
+        currentPages().handleShowToast("配置系统缓存成功");
       } else {
         uni.showToast({
           title: "配置系统缓存失败！",
@@ -671,14 +624,21 @@ export default {
         ip: this.controlIP,
       };
       uni.setStorageSync("authControlIP", this.controlIP);
-      let res = await Api.apiCall("get", Api.index.getControlInfo, params, true);
+      let res = await Api.apiCall(
+        "get",
+        Api.index.getControlInfo,
+        params,
+        true
+      );
       if (res.state.code == 200) {
         if (!isNullStr(res.data)) {
           // 设置本地缓存公共方法
           this.setControlStorage(res.data);
           if (!isNullStr(uni.getStorageSync("controlInfo").controlCode)) {
             //初始化配置WS服务
-            this.connectWebSocketInit(uni.getStorageSync("controlInfo").controlCode);
+            this.connectWebSocketInit(
+              uni.getStorageSync("controlInfo").controlCode
+            );
           } else {
             uni.showToast({
               title: "缓存设置失败！！",
@@ -708,12 +668,17 @@ export default {
       let params = {
         ip: this.controlIP,
       };
-      let res = await Api.apiCall("get", Api.index.getControlInfo, params, true);
+      let res = await Api.apiCall(
+        "get",
+        Api.index.getControlInfo,
+        params,
+        true
+      );
       if (res.state.code == 200) {
         if (!isNullStr(res.data)) {
           // 设置本地缓存公共方法
           this.setControlStorage(res.data);
-          this.handleShowToast("绑定终端信息成功！");
+          currentPages().handleShowToast("绑定终端信息成功！");
         } else {
           uni.showToast({
             title: "请先添加终端！",
@@ -771,6 +736,16 @@ export default {
       this.reconnectCount++;
       this.connectWebSocketInit(uni.getStorageSync("controlInfo").controlCode);
     },
+    webSocketOff() {
+      // 离线标记
+      // this.showDevOffline = true;
+      // websocket 断开标记
+      getApp().globalData.webSocketConnected = false;
+      // 系统配置信息
+      this.sysWebSocketInfo = "";
+      // 打开重复认证终端
+      this.isWebSocketDisable = false;
+    },
     webSocketOn() {
       getApp().globalData.webSocketConnected = true;
       this.sysWebSocketInfo = "已连接";
@@ -781,19 +756,9 @@ export default {
       this.reconnectCount = 0;
       console.log("WebSocket连接成功！");
     },
-    webSocketOff() {
-      // 离线标记
-      this.showDevOffline = true;
-      // websocket 断开标记
-      getApp().globalData.webSocketConnected = false;
-      // 系统配置信息
-      this.sysWebSocketInfo = "";
-      // 打开重复认证终端
-      this.isWebSocketDisable = false;
-    },
     // 发送WebSocket消息
     sendWebsocket(data, successCB, failCB) {
-      this.socketTask.send({
+      this.socketTask && this.socketTask.send({
         data,
         success(res) {
           successCB && successCB();
@@ -809,16 +774,9 @@ export default {
     socketHeartbeatCheck() {
       if (this.heartbeatTimer == null) {
         let hearTimeOut = uni.getStorageSync("heartBeatTimeOut");
-        let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-        Log.writeLog(`= start-socket-heartbeat-check-${now}`, false);
         this.heartbeatTimer = setInterval(() => {
           // 规定时间内未收到心跳，发起重新连接
           if (!this.isHeartbeat) {
-            let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-            Log.writeLog(
-              `socket-heartbeat-check-status-${this.isHeartbeat}-${now}`,
-              false
-            );
             this.webSocketReConnect();
           }
           // 触发一次检测后重置心跳默认状态
@@ -829,20 +787,8 @@ export default {
     closeSocket() {
       if (this.socketTask != null) {
         this.socketTask.close({
-          success: (res) => {
-            let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-            Log.writeLog(
-              `socketTask.close.success-${JSON.stringify(res)}-${now}`,
-              false
-            );
-          },
-          fail: (err) => {
-            let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-            Log.writeLog(
-              `socketTask.close.fail-${JSON.stringify(err)}-${now}`,
-              false
-            );
-          },
+          success: (res) => { },
+          fail: (err) => { },
         });
         this.socketTask = null;
       }
@@ -853,13 +799,11 @@ export default {
       this.socketHeartbeatCheck();
       // 设备离线状态
       if (!getApp().globalData.webSocketConnected) {
-        this.showDevOffline = true;
+        // this.showDevOffline = true;
       } else {
         this.showDevOffline = false;
         return;
       }
-      let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-      Log.writeLog(`== connectWebSocketInit-${now}`, false);
       if (this.socketTask != null) {
         this.closeSocket();
       }
@@ -873,8 +817,6 @@ export default {
         },
       });
       this.socketTask.onOpen((res) => {
-        let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-        Log.writeLog(`==== socketTask.onOpen-${now}`, false);
         this.handleShowToast("终端服务连接成功！");
         this.webSocketOn();
         if (this.tagIndex == 42) {
@@ -884,20 +826,8 @@ export default {
           this.$refs.home.getOnlineAlermInfo();
         }
       });
-      this.socketTask.onError((err) => {
-        let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-        Log.writeLog(
-          `==== socketTask.onError-${JSON.stringify(err)}-${now}`,
-          false
-        );
-      });
-      this.socketTask.onClose((res) => {
-        let now = dateFormat("YYYY-MM-DD hh:mm:ss", new Date());
-        Log.writeLog(
-          `==== socketTask.onClose-${JSON.stringify(res)}-${now}`,
-          false
-        );
-      });
+      this.socketTask.onError((err) => { });
+      this.socketTask.onClose((res) => { });
       // 接收分机websocket消息
       this.socketTask.onMessage((res) => {
         let info = JSON.parse(res.data);
@@ -906,7 +836,7 @@ export default {
           // 收到心跳包
           this.isHeartbeat = true;
           const { controlCode } = uni.getStorageSync("controlInfo");
-          this.sendWebsocket(
+          currentPages().sendWebsocket(
             `{maindevno:'${controlCode}', devno:'', type:'000', msg:'1',extend:{'ip':'${this.controlIP}'}}`
           );
         } else if (info.type == this.$config.controlType.INTERCOM) {
@@ -914,10 +844,9 @@ export default {
             // 主分机|仓外屏发起视频通话
             if ((info.msg == "16" || info.msg == "19") && this.monitorState) {
               const { controlCode } = uni.getStorageSync("controlInfo");
-              this.sendWebsocket(
+              currentPages().sendWebsocket(
                 `{maindevno:"${controlCode}",devno:"${info.devno}",type:"100",msg:"6"}`
               );
-              this.setDisableTab(false);
               return;
             }
             if (this.tagIndex == 42) {
@@ -951,7 +880,7 @@ export default {
             }
           } else if (info.msg == "6" || info.msg == "25") {
             // 取消主机|仓外屏视频通话
-            if (!info.devno.startsWith('control')) {
+            if (!info.devno.startsWith("control")) {
               this.voiceBroadcast("对方正忙，请稍后再拨");
               this.$refs.intercom.closeVideoModel(true);
               let intercomName = this.intercomInfo.name;
@@ -978,7 +907,7 @@ export default {
               // 回传本机音量
               getApp().globalData.FloatUniModule.getStreamVolumeTypeVoiceCall(
                 (e) => {
-                  this.sendWebsocket(
+                  currentPages().sendWebsocket(
                     `{maindevno:'${info.maindevno}', devno:'${info.devno}', type:'100', msg:'9',extend:'${e.value}'}`
                   );
                 }
@@ -1022,9 +951,11 @@ export default {
                 }
               });
             }
-            if (!this.chatList.length &&
+            if (
+              !this.chatList.length &&
               !this.alarmList.length &&
-              !this.openIntercom) {
+              !this.openIntercom
+            ) {
               this.setDisableTab(false);
               this.setCallState(false);
             }
@@ -1054,10 +985,12 @@ export default {
           } else if (info.msg == "18") {
             // 主机对讲超时
             this.$refs.intercom.closeVideoModel();
-            if (!this.isOpenModal &&
+            if (
+              !this.isOpenModal &&
               !this.chatList.length &&
               !this.alarmList.length &&
-              !this.openIntercom) {
+              !this.openIntercom
+            ) {
               this.setDisableTab(false);
             }
             // 更新未接来电列表
@@ -1069,7 +1002,6 @@ export default {
             } else {
               this.$refs.intercom.closeVideoModel(true);
             }
-            this.setDisableTab(false);
           }
         } else if (info.type == this.$config.controlType.RADIO) {
           // 广播分机连接状态
@@ -1142,7 +1074,7 @@ export default {
               }, 5000);
             }
             if (this.tagIndex == 42) {
-              getApp().globalData.Base.speechStop();
+              // getApp().globalData.Base.speechStop();
               this.$refs.intercom.closeIntercomModal();
               if (this.openIntercom && this.isPolling) {
                 this.$refs.intercom.hangupMonitor().then(() => {
@@ -1172,9 +1104,11 @@ export default {
                 });
               }
             }
-            if (!this.chatList.length &&
+            if (
+              !this.chatList.length &&
               !this.alarmList.length &&
-              !this.openIntercom) {
+              !this.openIntercom
+            ) {
               this.setDisableTab(false);
               this.setCallState(false);
             }
@@ -1193,19 +1127,17 @@ export default {
             }
           }
         } else if (info.type == this.$config.controlType.DEVICE) {
+          let content = {
+            content: info.extend,
+          };
           if (info.msg == "0") {
-            let options = {
-              content: info.extend,
-            };
-            getApp().globalData.Base.speech(options);
             console.log("开始语音播报");
+            // getApp().globalData.Base.speech(content);
           } else if (info.msg == "1") {
-            getApp().globalData.Base.speechStop();
             console.log("停止语音播报");
+            // getApp().globalData.Base.speechStop();
           } else if (info.msg == "2") {
             console.log("设备校时");
-            this.timing = info.extend;
-            getApp().globalData.FloatUniModule.setSystemTime(info.extend);
           } else if (info.msg == "3") {
             // 设备重启
             getApp().globalData.FloatUniModule.rebootSystem();
@@ -1257,7 +1189,7 @@ export default {
             getApp().globalData.FloatUniModule.openGuard(0);
             console.log("关闭守护成功");
           } else if (info.msg == "13") {
-            Log.uploadLogFile(info.extend);
+            Log.uploadLogFile(content.content);
           } else if (info.msg == "15") {
             // 打开设备ADB
             getApp().globalData.UpdateApp.shell(
@@ -1392,7 +1324,7 @@ export default {
         // 处理报警回传消息
         const { controlCode } = uni.getStorageSync("controlInfo");
         let terminalCode = this.intercomInfo.devno;
-        this.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"500",msg:"5"}`
         );
         this.audioContext.stop();
@@ -1449,7 +1381,7 @@ export default {
       let options = {
         content: voiceText,
       };
-      getApp().globalData.Base.speech(options);
+      // getApp().globalData.Base.speech(options);
     },
     openModal(type) {
       this[`show${type}`] = true;

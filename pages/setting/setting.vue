@@ -45,7 +45,7 @@
         </div>
         <div class="common-modal-button">
           <div class="btn-cancel" @click="closeModal('RestartDev')">取消</div>
-          <div class="btn-confirm" @touchstart.stop="handleRestartDev">
+          <div class="btn-confirm" @click="handleRestartDev">
             确定
           </div>
         </div>
@@ -59,7 +59,7 @@
         </div>
         <div class="common-modal-button">
           <div class="btn-cancel" @click="closeModal('RestartApp')">取消</div>
-          <div class="btn-confirm" @touchstart.stop="handleRestartApp">
+          <div class="btn-confirm" @click="handleRestartApp">
             确定
           </div>
         </div>
@@ -73,7 +73,7 @@
         </div>
         <div class="common-modal-button">
           <div class="btn-cancel" @click="closeModal('ConfigInfo')">取消</div>
-          <div class="btn-confirm" @touchstart.stop="configInfoSync">确定</div>
+          <div class="btn-confirm" @click="configInfoSync">确定</div>
         </div>
       </div>
     </neil-modal>
@@ -89,7 +89,7 @@
         </scroll-view>
         <div class="update-modal-button">
           <div class="btn-cancel" @click="closeModal('UpdateApp')">取消</div>
-          <div class="btn-confirm" :class="{ 'btn-disabled': disabledClick }" @touchstart.stop="handleUpdateApp">
+          <div class="btn-confirm" :class="{ 'btn-disabled': disabledClick }" @click="handleUpdateApp">
             下载更新
           </div>
         </div>
@@ -104,6 +104,7 @@ import uniGridItem from "@/components/uni/uni-grid-item/uni-grid-item.vue";
 import settingMenu from "@/static/mock/settingMenu.json";
 import Api from "@/common/api.js";
 import Log from "@/common/utils/log.js";
+import { currentPages } from "@/common/utils/util";
 
 export default {
   name: "controlSet",
@@ -153,11 +154,11 @@ export default {
     },
     // 重启应用
     handleRestartApp() {
-      this.$parent.handleRestartApp();
+      currentPages().handleRestartApp();
     },
     // 同步配置信息
     configInfoSync() {
-      this.$parent.syncSystemInfo();
+      currentPages().syncSystemInfo();
       this.showConfigInfo = false;
     },
     // 升级APP

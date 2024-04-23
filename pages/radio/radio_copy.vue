@@ -330,7 +330,7 @@ export default {
     // 切换分机、分组列表
     handleTabChange(page) {
       if (this.radioState) {
-        this.$parent.handleShowToast("请先停止广播", "center", 5000);
+        currentPages().handleShowToast("请先停止广播", "center", 5000);
         return;
       }
       this.page = page;
@@ -386,7 +386,7 @@ export default {
     // 搜索分机监室
     searchTerminalRoom() {
       if (!this.searchTerminal) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchTerminal);
@@ -436,7 +436,7 @@ export default {
     // 搜索分组监室
     searchGroupRoom() {
       if (!this.searchGroup) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchGroup);
@@ -492,7 +492,7 @@ export default {
     // 选择分机列表
     terminalSelect(list) {
       if (this.radioState) {
-        this.$parent.handleShowToast("请先停止广播", "center", 5000);
+        currentPages().handleShowToast("请先停止广播", "center", 5000);
         return;
       }
       list.map((item) => {
@@ -675,7 +675,7 @@ export default {
     // 打开广播弹框
     handleRadioModal() {
       if (!this.roomSelectList.length) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.showRadioConfirm = true;
@@ -713,7 +713,7 @@ export default {
           // this.getRadioStatusInfo("300");
           // this.getRadioStatusInfo("400");
 
-          // this.$parent.startLivePusher();
+          // currentPages().startLivePusher();
 
           // 开始喊话广播
           // 添加喊话广播设备
@@ -727,7 +727,7 @@ export default {
           });
 
           // setTimeout(() => {
-          //   this.$parent.sendWebsocket(
+          //   currentPages().sendWebsocket(
           //     `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"200",msg:"0"}`
           //   );
           //   this.setDynamicInfo("200", `开始${this.prisonName}广播`);
@@ -741,11 +741,11 @@ export default {
           // 停止广播
           this.isMuted = false;
           this.setMuted(false);
-          // this.$parent.sendWebsocket(
+          // currentPages().sendWebsocket(
           //   `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"200",msg:"1"}`
           // );
 
-          // this.$parent.stopLivePusher();
+          // currentPages().stopLivePusher();
 
           // this.setDynamicInfo("200", `停止${this.prisonName}广播`);
           // // 保存广播播放状态
@@ -773,7 +773,7 @@ export default {
         // 刷新动态信息
         this.getDynamicInfo();
       } else {
-        this.$parent.handleShowToast("请求错误", "center");
+        currentPages().handleShowToast("请求错误", "center");
       }
     },
     // 保存广播播放状态
@@ -798,7 +798,7 @@ export default {
         params
       );
       if (res.state.code == 200) {
-        this.$parent.handleShowToast("保存状态成功", "bottom");
+        currentPages().handleShowToast("保存状态成功", "bottom");
       }
     },
     // 获取广播播放状态信息
@@ -813,7 +813,7 @@ export default {
         if (res.data.roomList.length) {
           switch (type) {
             case "200":
-              this.$parent.startLivePusher();
+              currentPages().startLivePusher();
               this.radioState = res.data.status == "start" ? true : false;
               this.roomTableList = res.data.roomList;
               this.roomSelectList = this.roomTableList;
@@ -899,7 +899,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"200",msg:"3",extend:"0"}`
         );
       } else {
@@ -910,7 +910,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"200",msg:"3",extend:"1"}`
         );
       }
@@ -929,7 +929,7 @@ export default {
     // 添加分组弹框
     handleAddGroup() {
       if (!this.roomSelectList.length) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.addGroupName = "";
@@ -942,7 +942,7 @@ export default {
     // 确认添加分组
     addGroupConfirm() {
       if (!this.addGroupName) {
-        this.$parent.handleShowToast("请输入分组名称", "center");
+        currentPages().handleShowToast("请输入分组名称", "center");
         return;
       }
       this.addGroup();
@@ -984,7 +984,7 @@ export default {
     // 确认修改分组名称
     modifyGroupConfirm() {
       if (!this.modifyGroupName) {
-        this.$parent.handleShowToast("请输入分组名称", "center");
+        currentPages().handleShowToast("请输入分组名称", "center");
         return;
       }
       this.$refs.vTree.groupChange = false;
@@ -1078,7 +1078,7 @@ export default {
         msg: "5",
         extend: { volumeList },
       };
-      this.$parent.sendWebsocket(JSON.stringify(controlObj));
+      currentPages().sendWebsocket(JSON.stringify(controlObj));
     },
     openModal(type) {
       this[`show${type}`] = true;

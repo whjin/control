@@ -14,7 +14,7 @@
 <script>
 import commonIcons from "@/components/common-icons/common-icons.vue";
 import { mapState, mapMutations } from "vuex";
-import { isNullStr } from "@/common/utils/util.js";
+import { isNullStr, currentPages } from "@/common/utils/util.js";
 
 export default {
 	name: "BottomTab",
@@ -43,7 +43,7 @@ export default {
 	created() {
 		if (!isNullStr(uni.getStorageSync("baseUrl"))) {
 			// 获取APP配置菜单
-			this.$parent.getAppMenuList();
+			currentPages().getAppMenuList();
 		}
 	},
 	methods: {
@@ -61,7 +61,7 @@ export default {
 		// 打开未接来电弹框
 		openCallModal() {
 			if (this.curTabId == 42) {
-				this.$parent.openMissCallModal();
+				currentPages().openMissCallModal();
 			}
 		},
 	},

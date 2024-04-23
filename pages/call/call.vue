@@ -15,7 +15,8 @@
 						<div v-show="page == 0" class="terminal-list">
 							<div class="terminal-search rectangle-img">
 								<input class="input-search" v-model="searchTerminal" @input="searchTerminalChange" />
-								<common-icons type="iconsearch" color="#fff" size="20" @click="searchTerminalRoom"></common-icons>
+								<common-icons type="iconsearch" color="#fff" size="20"
+									@click="searchTerminalRoom"></common-icons>
 							</div>
 							<div class="terminal-room-box">
 								<scroll-view scroll-y="true">
@@ -23,7 +24,8 @@
 									<v-tree v-if="currentPage == 0" showCheckbox :root="terminalList"
 										:changeHandler="terminalSelect"></v-tree>
 									<!-- 点名记录 -->
-									<v-tree v-else showRadio leaf-only :root="terminalList" :changeHandler="terminalRadioSelect"></v-tree>
+									<v-tree v-else showRadio leaf-only :root="terminalList"
+										:changeHandler="terminalRadioSelect"></v-tree>
 								</scroll-view>
 							</div>
 						</div>
@@ -36,8 +38,9 @@
 							</div>
 							<div class="terminal-room-box">
 								<scroll-view scroll-y="true">
-									<v-tree ref="vTree" showCheckbox :showGroup="true" :root="groupList" :changeHandler="groupSelect"
-										@group-change="openModifyGroup" @group-delete="openDeleteGroup"></v-tree>
+									<v-tree ref="vTree" showCheckbox :showGroup="true" :root="groupList"
+										:changeHandler="groupSelect" @group-change="openModifyGroup"
+										@group-delete="openDeleteGroup"></v-tree>
 								</scroll-view>
 							</div>
 						</div>
@@ -289,7 +292,7 @@ import vtimeLine from "@/components/v-timeLine/v-timeLine.vue";
 import vTree from "@/components/v-tree/v-tree.vue";
 import xflSelect from "@/components/xfl-select/xfl-select.vue";
 import Api from "@/common/api.js";
-import { hasKey, unique, uniqueArr, dateFormat } from "@/common/utils/util.js";
+import { hasKey, unique, uniqueArr, dateFormat, currentPages } from "@/common/utils/util.js";
 import callColumns from "@/static/mock/callColumns.json";
 import callRecordColumns from "@/static/mock/callRecordColumns.json";
 import spaceList from "@/static/mock/spaceList.json";
@@ -511,7 +514,7 @@ export default {
 		// 搜索分机监室
 		searchTerminalRoom() {
 			if (!this.searchTerminal) {
-				this.$parent.handleShowToast("请输入搜索内容", "center");
+				currentPages().handleShowToast("请输入搜索内容", "center");
 				return;
 			}
 			let reg = new RegExp(this.searchTerminal);
@@ -560,7 +563,7 @@ export default {
 		// 搜索分组监室
 		searchGroupRoom() {
 			if (!this.searchGroup) {
-				this.$parent.handleShowToast("请输入搜索内容", "center");
+				currentPages().handleShowToast("请输入搜索内容", "center");
 				return;
 			}
 			let reg = new RegExp(this.searchGroup);
@@ -772,7 +775,7 @@ export default {
 		// 打开点名弹框
 		handleCallModal() {
 			if (!this.roomSelectList.length) {
-				this.$parent.handleShowToast("请先选择监室", "center");
+				currentPages().handleShowToast("请先选择监室", "center");
 				return;
 			}
 			this.showCallConfirm = true;
@@ -780,7 +783,7 @@ export default {
 		// 开始点名
 		startCall() {
 			if (this.duration < 30) {
-				this.$parent.handleShowToast("点名时长至少30分钟", "center");
+				currentPages().handleShowToast("点名时长至少30分钟", "center");
 				return;
 			}
 			if (!this.isRepeatState) {
@@ -815,7 +818,7 @@ export default {
 					this.saveCallPlayStatus("start");
 				}, 1500);
 			} else {
-				this.$parent.handleShowToast(res.state.msg || "临时点名发起失败", "center");
+				currentPages().handleShowToast(res.state.msg || "临时点名发起失败", "center");
 			}
 			this.showCallConfirm = false;
 		},
@@ -837,7 +840,7 @@ export default {
 				params
 			);
 			if (res.state.code == 200) {
-				this.$parent.handleShowToast("保存状态成功");
+				currentPages().handleShowToast("保存状态成功");
 			}
 		},
 		// 获取点名状态信息
@@ -942,13 +945,13 @@ export default {
 				// 刷新动态信息
 				this.getDynamicInfo();
 			} else {
-				this.$parent.handleShowToast("请求错误", "center");
+				currentPages().handleShowToast("请求错误", "center");
 			}
 		},
 		// 添加分组弹框
 		handleAddGroup() {
 			if (!this.roomSelectList.length) {
-				this.$parent.handleShowToast("请先选择监室", "center");
+				currentPages().handleShowToast("请先选择监室", "center");
 				return;
 			}
 			this.addGroupName = "";
@@ -961,7 +964,7 @@ export default {
 		// 确认添加分组
 		addGroupConfirm() {
 			if (!this.addGroupName) {
-				this.$parent.handleShowToast("请输入分组名称", "center");
+				currentPages().handleShowToast("请输入分组名称", "center");
 				return;
 			}
 			this.addGroup();
@@ -1003,7 +1006,7 @@ export default {
 		// 确认修改分组名称
 		modifyGroupConfirm() {
 			if (!this.modifyGroupName) {
-				this.$parent.handleShowToast("请输入分组名称", "center");
+				currentPages().handleShowToast("请输入分组名称", "center");
 				return;
 			}
 			this.$refs.vTree.groupChange = false;

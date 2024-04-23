@@ -43,8 +43,6 @@ const state = {
   tabList: [],
   // 菜单列表
   menuList: [],
-  // 来邦服务状态
-  IPCState: false,
   // 禁止Tab切换
   disableTab: false,
 };
@@ -177,10 +175,6 @@ const mutations = {
   // 设置呼叫方状态
   SET_CALLSTATE(state, bool) {
     state.callState = bool;
-  },
-  // 来邦服务状态
-  SET_IPCSTATE(state, bool) {
-    state.IPCState = bool;
   },
   // 设置Tab切换状态
   SET_DISABLETAB(state, bool) {

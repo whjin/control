@@ -1,45 +1,39 @@
 <template>
-	<div class="home-container">
-		<div class="home-wrapper">
-			<div class="home-content-left">
-				<div class="home-content-wrapper">
-					<div class="home-content-box">
-						<div class="home-content-header">
-							<text>在线报警情况</text>
-						</div>
-						<div class="home-content-one">
-							<div class="content-one-list">
-								<div class="rectangle-active-img content-one-item">
-									<text class="content-text">主机在线情况</text>
-									<view class="content-num">
-										<view class="content-num-one">{{
-                      onlineAlarmList.controlOnLine || 0
-                    }}</view>
-										<view class="content-num-two">{{
+  <div class="home-container">
+    <div class="home-wrapper">
+      <div class="home-content-left">
+        <div class="home-content-wrapper">
+          <div class="home-content-box">
+            <div class="home-content-header">
+              <text>在线报警情况</text>
+            </div>
+            <div class="home-content-one">
+              <div class="content-one-list">
+                <div class="rectangle-active-img content-one-item">
+                  <text class="content-text">主机在线情况</text>
+                  <view class="content-num">
+                    <view class="content-num-one">
+                      {{ onlineAlarmList.controlOnLine || 0 }}</view>
+                    <view class="content-num-two">{{
                       `/${onlineAlarmList.controlCount || 0}`
                     }}</view>
                   </view>
                   <view class="content-total">在线数/总数</view>
                 </div>
-                <view
-                  class="rectangle-active-img content-one-item"
-                  @click="handleShowTerminalStateDialog"
-                >
+                <view class="rectangle-active-img content-one-item" @click="handleShowTerminalStateDialog">
                   <text class="content-text">分机在线情况</text>
                   <view class="content-num">
+                    <view class="content-num-one">
+                      {{ onlineAlarmList.terminalOnLine || 0 }}</view>
+                    <view class="content-num-two">
+                      {{ `/${onlineAlarmList.terminalCount || 0}` }}</view>
+                  </view>
+                  <view class="content-total">在线数/总数</view>
+                </view>
+                <view class="rectangle-active-img content-one-item">
+                  <text class="content-text">报警情况</text>
+                  <view class="content-num">
                     <view class="content-num-one">{{
-                      onlineAlarmList.terminalOnLine || 0
-                    }}</view>
-										<view class="content-num-two">{{
-                      `/${onlineAlarmList.terminalCount || 0}`
-                    }}</view>
-									</view>
-									<view class="content-total">在线数/总数</view>
-								</view>
-								<view class="rectangle-active-img content-one-item">
-									<text class="content-text">报警情况</text>
-									<view class="content-num">
-										<view class="content-num-one">{{
                       onlineAlarmList.intraDayAlarmNumber || 0
                     }}</view>
                   </view>
@@ -55,12 +49,7 @@
             <div class="home-content-two">
               <div class="content-two-list">
                 <div class="content-title"><text>报警数量</text></div>
-                <canvas
-                  canvas-id="canvasColumn"
-                  id="canvasColumn"
-                  class="charts"
-                  @touchstart="touchColumn"
-                ></canvas>
+                <canvas canvas-id="canvasColumn" id="canvasColumn" class="charts" @touchstart="touchColumn"></canvas>
               </div>
             </div>
           </div>
@@ -70,34 +59,21 @@
               <div class="state-bar">
                 <block v-for="(item, index) in piearr" :key="index">
                   <div class="state-bar-item">
-                    <div
-                      class="point"
-                      :style="{ 'background-color': item.color }"
-                    ></div>
+                    <div class="point" :style="{ 'background-color': item.color }"></div>
                     <div class="text">{{ item.name }}</div>
                   </div>
                 </block>
               </div>
             </div>
-            <div
-              class="home-content-three"
-              :class="{ 'canvas-pie-center': canvasPieState }"
-            >
+            <div class="home-content-three" :class="{ 'canvas-pie-center': canvasPieState }">
               <div class="content-three-list">
-                <div
-                  class="content-three-item"
-                  v-for="(item, index) in onlineStatusList"
-                  :key="index"
-                >
+                <div class="content-three-item" v-for="(item, index) in onlineStatusList" :key="index">
                   <text class="rectangle-active-img content-text">{{
                     item.areaName
                   }}</text>
                   <div class="charts-pie-box">
-                    <canvas
-                      :canvas-id="'canvasPie' + index"
-                      class="canvas-pie"
-                      @touchstart="touchPie($event, index)"
-                    ></canvas>
+                    <canvas :canvas-id="'canvasPie' + index" class="canvas-pie"
+                      @touchstart="touchPie($event, index)"></canvas>
                   </div>
                 </div>
               </div>
@@ -110,12 +86,7 @@
             <view class="home-content-four">
               <view class="content-four-list">
                 <div class="content-title"><text>报警数量</text></div>
-                <canvas
-                  canvas-id="canvasColumnE"
-                  id="canvasColumnE"
-                  class="charts"
-                  @touchstart="touchColumnE"
-                ></canvas>
+                <canvas canvas-id="canvasColumnE" id="canvasColumnE" class="charts" @touchstart="touchColumnE"></canvas>
               </view>
             </view>
           </div>
@@ -127,15 +98,9 @@
         </scroll-view>
       </div>
     </div>
-    <tableDialog
-      :isShow="showTerminalStateDialog"
-      title="分机在线详情"
-      :headers="terminalOnlineStateList.headers"
-      :contents="terminalOnlineStateList.contents"
-      @scrolltolower="handleTerminalStateScrolltolower"
-      @clickHeadItem="handleTerminalStateSort"
-      @close="handleTerminalStateDialogClose"
-    ></tableDialog>
+    <tableDialog :isShow="showTerminalStateDialog" title="分机在线详情" :headers="terminalOnlineStateList.headers"
+      :contents="terminalOnlineStateList.contents" @scrolltolower="handleTerminalStateScrolltolower"
+      @clickHeadItem="handleTerminalStateSort" @close="handleTerminalStateDialogClose"></tableDialog>
   </div>
 </template>
 <script>
@@ -143,14 +108,14 @@ import Api from "@/common/api.js";
 import vtimeLine from "@/components/v-timeLine/v-timeLine.vue";
 import tableDialog from "@/components/table-dialog/table-dialog.vue";
 import uCharts from "@/components/u-charts/u-charts.js";
-import { dateFormat } from "@/common/utils/util.js";
+import { dateFormat, currentPages } from "@/common/utils/util.js";
 
 let canvaColumn = null;
 let canvaColumnE = null;
 let canvasPieData = null;
 
 export default {
-  name: "indexMain",
+  name: "index",
   components: {
     vtimeLine,
     tableDialog,
@@ -390,7 +355,7 @@ export default {
       });
       if (res.state.code == 200) {
         if (showTips) {
-          this.$parent.handleShowToast("刷新成功！");
+          currentPages().handleShowToast("刷新成功！");
         }
         this.messageList = res.data;
         this.messageList.map((item) => {
@@ -599,7 +564,6 @@ export default {
         Api.index.terminalOnlineStatusInfo,
         this.terminalOnlineStateList.params
       );
-      uni.hideLoading();
       if (res.state.code === 200) {
         if (res.data && res.data.length) {
           this.terminalOnlineStateList.total = res.page.total;

@@ -267,6 +267,7 @@ import {
   uniqueArr,
   timeFormat,
   dateFormat,
+  currentPages
 } from "@/common/utils/util.js";
 import audioColumns from "@/static/mock/audioColumns.json";
 import roomColumns from "@/static/mock/roomColumns.json";
@@ -358,7 +359,7 @@ export default {
     // 切换分机|分组列表
     handleTabChange(page) {
       if (this.audioState) {
-        this.$parent.handleShowToast("请先停止播放音频", "center", 5000);
+        currentPages().handleShowToast("请先停止播放音频", "center", 5000);
         return;
       }
       this.page = page;
@@ -450,7 +451,7 @@ export default {
     // 搜索分机监室
     searchTerminalRoom() {
       if (!this.searchTerminal) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchTerminal);
@@ -499,7 +500,7 @@ export default {
     // 搜索分组监室
     searchGroupRoom() {
       if (!this.searchGroup) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchGroup);
@@ -654,7 +655,7 @@ export default {
     // 全选音频表格行
     checkAudioAll() {
       if (this.audioState) {
-        this.$parent.handleShowToast("请先停止分机播放", "center");
+        currentPages().handleShowToast("请先停止分机播放", "center");
         return;
       }
       if (!this.audioTableList.length) {
@@ -700,7 +701,7 @@ export default {
     // 选择音频表格行
     checkAudioChange(audio, index) {
       if (this.audioState) {
-        this.$parent.handleShowToast("请先停止分机播放", "center");
+        currentPages().handleShowToast("请先停止分机播放", "center");
         return;
       }
       this.audioSelectList = [];
@@ -796,11 +797,11 @@ export default {
     // 打开分机弹框
     handleAudioModal() {
       if (!this.audioSelectList.length) {
-        this.$parent.handleShowToast("请先选择音频", "center");
+        currentPages().handleShowToast("请先选择音频", "center");
         return;
       }
       if (!this.roomSelectList.length) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.showAudioConfirm = true;
@@ -837,14 +838,14 @@ export default {
         this.getAudioStatusInfo("200");
         this.getAudioStatusInfo("400");
         setTimeout(() => {
-          this.$parent.sendWebsocket(JSON.stringify(controlObj));
+          currentPages().sendWebsocket(JSON.stringify(controlObj));
           this.setDynamicInfo("300", `开始播放${this.prisonName}音频`);
         }, 0);
         setTimeout(() => {
           // 保存音频播放状态
           this.saveAudioPlayStatus("start");
         }, 1500);
-        this.$parent.stopLivePusher();
+        currentPages().stopLivePusher();
       } else {
         // 停止播放音频
         this.hanleStopAudio();
@@ -856,7 +857,7 @@ export default {
       let terminalCode = this.roomSelectList
         .map((item) => item.terminalCode)
         .toString();
-      this.$parent.sendWebsocket(
+      currentPages().sendWebsocket(
         `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"300",msg:"1"}`
       );
       this.setDynamicInfo("300", `停止播放${this.prisonName}音频`);
@@ -877,7 +878,7 @@ export default {
         // 刷新动态信息
         this.getDynamicInfo();
       } else {
-        this.$parent.handleShowToast("请求错误", "center");
+        currentPages().handleShowToast("请求错误", "center");
       }
     },
     // 保存音频播放状态
@@ -903,7 +904,7 @@ export default {
         params
       );
       if (res.state.code == 200) {
-        this.$parent.handleShowToast("保存状态成功", "bottom");
+        currentPages().handleShowToast("保存状态成功", "bottom");
       }
     },
     // 获取音频播放状态信息
@@ -1004,7 +1005,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"300",msg:"4",extend:"0"}`
         );
       } else {
@@ -1015,7 +1016,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"300",msg:"4",extend:"1"}`
         );
       }
@@ -1023,7 +1024,7 @@ export default {
     // 添加分组弹框
     handleAddGroup() {
       if (!this.roomSelectList.length) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.addGroupName = "";
@@ -1036,7 +1037,7 @@ export default {
     // 确认添加分组
     addGroupConfirm() {
       if (!this.addGroupName) {
-        this.$parent.handleShowToast("请输入分组名称", "center");
+        currentPages().handleShowToast("请输入分组名称", "center");
         return;
       }
       this.addGroup();
@@ -1078,7 +1079,7 @@ export default {
     // 确认修改分组名称
     modifyGroupConfirm() {
       if (!this.modifyGroupName) {
-        this.$parent.handleShowToast("请输入分组名称", "center");
+        currentPages().handleShowToast("请输入分组名称", "center");
         return;
       }
       this.$refs.vTree.groupChange = false;
@@ -1172,7 +1173,7 @@ export default {
         msg: "5",
         extend: { volumeList },
       };
-      this.$parent.sendWebsocket(JSON.stringify(controlObj));
+      currentPages().sendWebsocket(JSON.stringify(controlObj));
     },
     openModal(type) {
       this[`show${type}`] = true;

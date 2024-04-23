@@ -337,7 +337,7 @@ import vtimeLine from "@/components/v-timeLine/v-timeLine.vue";
 import vTree from "@/components/v-tree/v-tree.vue";
 import commonIcons from "@/components/common-icons/common-icons.vue";
 import Api from "@/common/api.js";
-import { unique, uniqueArr, dateFormat } from "@/common/utils/util.js";
+import { unique, uniqueArr, dateFormat, currentPages } from "@/common/utils/util.js";
 import managerList from "@/static/mock/manager/managerList.json";
 import managerColumns from "@/static/mock/manager/managerColumns.json";
 import roomColumns from "@/static/mock/roomColumns.json";
@@ -604,7 +604,7 @@ export default {
     // 搜索分机监室
     searchTerminalRoom() {
       if (!this.searchTerminal) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchTerminal);
@@ -653,7 +653,7 @@ export default {
     // 搜索分组监室
     searchGroupRoom() {
       if (!this.searchGroup) {
-        this.$parent.handleShowToast("请输入搜索内容", "center");
+        currentPages().handleShowToast("请输入搜索内容", "center");
         return;
       }
       let reg = new RegExp(this.searchGroup);
@@ -788,7 +788,7 @@ export default {
     // 全选音频表格行
     checkAudioAll() {
       if (this.audioState) {
-        this.$parent.handleShowToast("请先停止分机播放", "center");
+        currentPages().handleShowToast("请先停止分机播放", "center");
         return;
       }
       if (!this.audioTableList.length) {
@@ -834,7 +834,7 @@ export default {
     // 选择音频表格行
     checkAudioChange(audio, index) {
       if (this.audioState) {
-        this.$parent.handleShowToast("请先停止分机播放", "center");
+        currentPages().handleShowToast("请先停止分机播放", "center");
         return;
       }
       this.audioSelectList = [];
@@ -956,7 +956,7 @@ export default {
             audioList: audioList,
           },
         };
-        this.$parent.sendWebsocket(JSON.stringify(controlObj));
+        currentPages().sendWebsocket(JSON.stringify(controlObj));
         let params = {
           controlId: uni.getStorageSync("controlInfo").id,
           type: "300",
@@ -975,7 +975,7 @@ export default {
       let terminalCode = this.roomSelectList
         .map((item) => item.terminalCode)
         .toString();
-      this.$parent.sendWebsocket(
+      currentPages().sendWebsocket(
         `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"300",msg:"1"}`
       );
       let params = {
@@ -997,7 +997,7 @@ export default {
         // 刷新动态信息
         this.getDynamicInfo();
       } else {
-        this.$parent.handleShowToast("请求错误", "center");
+        currentPages().handleShowToast("请求错误", "center");
       }
     },
     // 分机连接状态
@@ -1031,7 +1031,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"300",msg:"4",extend:"0"}`
         );
       } else {
@@ -1042,7 +1042,7 @@ export default {
             this.roomTableList.splice(index, 1, data);
           }
         });
-        this.$parent.sendWebsocket(
+        currentPages().sendWebsocket(
           `{maindevno:"${controlCode}",devno:"${data.terminalCode}",type:"300",msg:"4",extend:"1"}`
         );
       }
@@ -1050,7 +1050,7 @@ export default {
     // 添加分组弹框
     handleAddGroup(status) {
       if (!this.selectSongNum) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.isRead = status;
@@ -1077,7 +1077,7 @@ export default {
       if (this.currentPage < 5) {
         this.addGroup();
       } else {
-        this.$parent.handleShowToast("上传成功！", "center");
+        currentPages().handleShowToast("上传成功！", "center");
       }
       this.closeModal("AddGroup");
       let status = this.currentInfo.status ? 1 : 0;
@@ -1109,7 +1109,7 @@ export default {
     async controlHandler(uri) {
       let res = await Api.apiCall("get", Api.test.controlOut + uri, null);
       if (res.state.code == 200) {
-        this.$parent.handleShowToast("指令下发成功！");
+        currentPages().handleShowToast("指令下发成功！");
       }
     },
     addGroup() {
@@ -1153,14 +1153,14 @@ export default {
     // 修改分组弹框
     openModifyGroup(list) {
       if (!this.selectSongNum) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.showModifyGroup = true;
     },
     closeModifyGroup() {
       if (!this.selectSongNum) {
-        this.$parent.handleShowToast("请先选择监室", "center");
+        currentPages().handleShowToast("请先选择监室", "center");
         return;
       }
       this.audioTableList.map((i) => {
@@ -1179,7 +1179,7 @@ export default {
           return i;
         });
       });
-      this.$parent.handleShowToast("一键撤防成功！", "center");
+      currentPages().handleShowToast("一键撤防成功！", "center");
     },
     // 获取修改分组名称
     modifyGroupChange(e) {
@@ -1198,7 +1198,7 @@ export default {
       });
       this.selectSongNum = 0;
       this.isAudioAll = false;
-      this.$parent.handleShowToast("一键布防成功！", "center");
+      currentPages().handleShowToast("一键布防成功！", "center");
       this.closeModal("ModifyGroup");
     },
     // 修改分组名称
