@@ -88,7 +88,7 @@
             <div class="center-table-box">
               <div class="table-head">
                 <div class="head-checkbox" @click="checkRoomAll">
-                  <common-icons :type="isRoomAll ? 'iconcheckbox' : 'iconcheck-unselect'" color="#2A4273"
+                  <common-icons :type="isRoomAll ? 'iconcheckbox' : 'iconcheck-unselect'" color="#2a4273"
                     size="24"></common-icons>
                 </div>
                 <div class="radio-head-item" v-for="(item, index) in radioColumns" :key="index">
@@ -100,8 +100,8 @@
                   <div class="table-content">
                     <div class="content-checkbox" @click="checkRoomChange(item, index)">
                       <common-icons :type="item.isSelectRoom
-                        ? 'iconcheckbox'
-                        : 'iconcheck-unselect'
+                          ? 'iconcheckbox'
+                          : 'iconcheck-unselect'
                         " color="#2A4273" size="24"></common-icons>
                     </div>
                     <div class="radio-table-item" style="flex: 1">
@@ -336,8 +336,10 @@ export default {
     },
     // 获取分机列表
     async getTerminalInfo() {
-      const { areaId: id } = uni.getStorageSync("controlInfo");
-      let res = await Api.apiCall("get", Api.index.getRoomByAreaId, { id });
+      const { areaId } = uni.getStorageSync("controlInfo");
+      let res = await Api.apiCall("get", Api.index.getRoomByAreaId, {
+        id: areaId,
+      });
       if (res.state.code == 200) {
         let result = [];
         res.data.map((item) => {
@@ -353,7 +355,7 @@ export default {
     async getGroupList() {
       let controlId = uni.getStorageSync("controlInfo").id;
       let res = await Api.apiCall("get", Api.index.getGroupList, {
-        controlId,
+        controlId: controlId,
       });
       if (res.state.code == 200) {
         let result = [];
@@ -370,7 +372,7 @@ export default {
     async getDynamicInfo() {
       let controlId = uni.getStorageSync("controlInfo").id;
       let params = {
-        controlId,
+        controlId: controlId,
         type: "200",
       };
       let res = await Api.apiCall("get", Api.index.getDynamicInfo, params);
@@ -707,18 +709,14 @@ export default {
         }, 1500);
       } else {
         // 停止广播
-        this.stopRadio();
+        this.stopRadio(controlCode, terminalCode);
       }
     },
     // 关闭广播
-    stopRadio() {
+    stopRadio(controlCode, terminalCode) {
       // 取消主机静音
       this.isMuted = false;
       this.setMuted(false);
-      const { controlCode } = uni.getStorageSync("controlInfo");
-      let terminalCode = this.roomSelectList
-        .map((item) => item.terminalCode)
-        .toString();
       this.$parent.sendWebsocket(
         `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"200",msg:"1"}`
       );
@@ -799,8 +797,7 @@ export default {
                   list._checked = true;
                 }
                 list.children.map((item) => {
-                  item._checked = false;
-                  this.roomTableList.map((room) => {
+                  this.roomTableList.forEach((room) => {
                     if (item.terminalCode == room.terminalCode) {
                       item._checked = true;
                     }

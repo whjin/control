@@ -416,7 +416,7 @@
                 <div class="misscall-table-main" v-for="(item, index) in recordList" :key="index">
                   <div class="table-content">
                     <div class="misscall-table-item" style="flex: 1">
-                      {{ item.roomName }}
+                      {{ item.roomNo }}
                     </div>
                     <div class="misscall-table-item" style="flex: 1">
                       {{ item.time }}
@@ -1402,7 +1402,7 @@ export default {
                 }
                 break;
             }
-            await this.stopIntercomHandler(devRegType == 8 ? false : true);
+            await this.stopIntercomHandler();
           }
           this.setCallState(false);
           this.setHangupState(false);
@@ -1820,9 +1820,8 @@ export default {
     // 查询录像记录
     videoRecordSearch() {
       this.recordList = [];
-      let dir = uni.getStorageSync("videoRecordDir");
       let date = dateFormat("YYYYMMDD", new Date(this.recordDate));
-      let dirPath = `${dir}${date}/`;
+      let dirPath = `/storage/1AB6-BDFF/Rec/${date}/`;
       this.openModal("RecordModal");
       readDirectory(dirPath).then(
         (res) => {
@@ -1854,31 +1853,24 @@ export default {
     },
     // 查询录像记录数据处理
     videoRecordHandler(res) {
-      let videolist = [];
-      let terminalMap = {};
-      this.terminalList.children.map((list) => {
-        list.children.map((item) => {
-          terminalMap = Object.assign(terminalMap, { [item.sipAccount]: item.name });
-        });
-      });
+      let list = [];
       res.forEach((item) => {
         let record = item.name.slice(0, item.name.indexOf(".")).split("_");
-        let account = parseInt(record[1].slice(3));
-        let roomName = terminalMap[account] || account;
+        let roomNo = parseInt(record[1].slice(3));
         let date1 = record[3].replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
         let date2 = record[4].replace(/(\d{2})(\d{2})(\d{2})/, "$1:$2:$3");
         let time = `${date1} ${date2}`;
         let name = item.name;
         let path = item.fullPath;
-        videolist.push({ roomName, time, name, path });
+        list.push({ roomNo, time, name, path });
       });
-      videolist.sort((a, b) => {
+      list.sort((a, b) => {
         return b.time.localeCompare(a.time);
       });
-      this.recordList = videolist;
+      this.recordList = list;
       if (!!this.recordRoomNo) {
         this.recordList = this.recordList.filter(
-          (item) => item.roomName.includes(this.recordRoomNo)
+          (item) => item.roomNo == parseInt(this.recordRoomNo)
         );
       }
     },

@@ -1,21 +1,21 @@
 <template>
-	<div class="home-container">
-		<div class="home-wrapper">
-			<div class="home-content-left">
-				<div class="home-content-wrapper">
-					<div class="home-content-box">
-						<div class="home-content-header">
-							<text>在线报警情况</text>
-						</div>
-						<div class="home-content-one">
-							<div class="content-one-list">
-								<div class="rectangle-active-img content-one-item">
-									<text class="content-text">主机在线情况</text>
-									<view class="content-num">
-										<view class="content-num-one">{{
+  <div class="home-container">
+    <div class="home-wrapper">
+      <div class="home-content-left">
+        <div class="home-content-wrapper">
+          <div class="home-content-box">
+            <div class="home-content-header">
+              <text>在线报警情况</text>
+            </div>
+            <div class="home-content-one">
+              <div class="content-one-list">
+                <div class="rectangle-active-img content-one-item">
+                  <text class="content-text">主机在线情况</text>
+                  <view class="content-num">
+                    <view class="content-num-one">{{
                       onlineAlarmList.controlOnLine || 0
                     }}</view>
-										<view class="content-num-two">{{
+                    <view class="content-num-two">{{
                       `/${onlineAlarmList.controlCount || 0}`
                     }}</view>
                   </view>
@@ -30,16 +30,16 @@
                     <view class="content-num-one">{{
                       onlineAlarmList.terminalOnLine || 0
                     }}</view>
-										<view class="content-num-two">{{
+                    <view class="content-num-two">{{
                       `/${onlineAlarmList.terminalCount || 0}`
                     }}</view>
-									</view>
-									<view class="content-total">在线数/总数</view>
-								</view>
-								<view class="rectangle-active-img content-one-item">
-									<text class="content-text">报警情况</text>
-									<view class="content-num">
-										<view class="content-num-one">{{
+                  </view>
+                  <view class="content-total">在线数/总数</view>
+                </view>
+                <view class="rectangle-active-img content-one-item">
+                  <text class="content-text">报警情况</text>
+                  <view class="content-num">
+                    <view class="content-num-one">{{
                       onlineAlarmList.intraDayAlarmNumber || 0
                     }}</view>
                   </view>

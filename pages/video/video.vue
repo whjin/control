@@ -381,8 +381,10 @@ export default {
     },
     // 获取分机列表
     async getTerminalInfo() {
-      const { areaId: id } = uni.getStorageSync("controlInfo");
-      let res = await Api.apiCall("get", Api.index.getRoomByAreaId, { id });
+      const { areaId } = uni.getStorageSync("controlInfo");
+      let res = await Api.apiCall("get", Api.index.getRoomByAreaId, {
+        id: areaId,
+      });
       if (res.state.code == 200) {
         let result = [];
         res.data.map((item) => {
@@ -397,7 +399,9 @@ export default {
     // 获取分组列表
     async getGroupList() {
       let controlId = uni.getStorageSync("controlInfo").id;
-      let res = await Api.apiCall("get", Api.index.getGroupList, { controlId });
+      let res = await Api.apiCall("get", Api.index.getGroupList, {
+        controlId: controlId,
+      });
       if (res.state.code == 200) {
         let result = [];
         res.data.map((item) => {
@@ -413,7 +417,7 @@ export default {
     async getDynamicInfo() {
       let controlId = uni.getStorageSync("controlInfo").id;
       let params = {
-        controlId,
+        controlId: controlId,
         type: "400",
       };
       let res = await Api.apiCall("get", Api.index.getDynamicInfo, params);

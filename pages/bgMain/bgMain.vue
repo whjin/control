@@ -8,8 +8,7 @@
       <control-audio v-else-if="tagIndex == 44" ref="audio"></control-audio>
       <control-video v-else-if="tagIndex == 45" ref="video"></control-video>
       <control-set v-else-if="tagIndex == 46" ref="setting"></control-set>
-      <control-manager v-else-if="tagIndex == 47" ref="manager"></control-manager>
-      <control-call v-else-if="tagIndex == 48" ref="call"></control-call>
+      <control-control v-else-if="tagIndex == 47" ref="control"></control-control>
     </view>
     <bottom-tab ref="bottomtab" @click-change="handleTagChange" />
     <div class="neil-modal-container">
@@ -134,8 +133,7 @@ import controlRadio from "@/pages/radio/radio.vue";
 import controlAudio from "@/pages/audio/audio.vue";
 import controlVideo from "@/pages/video/video.vue";
 import controlSet from "@/pages/setting/setting.vue";
-import controlManager from "@/pages/manager/manager.vue";
-import controlCall from "@/pages/call/call.vue";
+import controlControl from "@/pages/control/control.vue";
 import vAlarm from "@/components/v-alarm/v-alarm.vue";
 import { isNullStr, dateFormat } from "@/common/utils/util.js";
 import Log from "@/common/utils/log.js";
@@ -156,8 +154,7 @@ export default {
     controlAudio,
     controlVideo,
     controlSet,
-    controlManager,
-    controlCall,
+    controlControl,
     vAlarm,
     keyboard,
   },
@@ -267,7 +264,6 @@ export default {
             if (this.timing) {
               getApp().globalData.FloatUniModule.setSystemTime(this.timing);
             }
-            getApp().globalData.FloatUniModule.hideTalkView(true);
             // 监听来邦对讲事件
             getApp().globalData.FloatUniModule.talkEventCallback((res) => {
               console.log("对讲服务事件：" + JSON.stringify(res));
@@ -463,7 +459,9 @@ export default {
           );
         }
         this.setDisableTab(false);
-        this.$refs.intercom.stopIntercomHandler();
+        if (!devno.includes("manager")) {
+          this.$refs.intercom.stopIntercomHandler();
+        }
       }
     },
     // 接听视频通话
@@ -917,7 +915,6 @@ export default {
               this.sendWebsocket(
                 `{maindevno:"${controlCode}",devno:"${info.devno}",type:"100",msg:"6"}`
               );
-              this.setDisableTab(false);
               return;
             }
             if (this.tagIndex == 42) {
@@ -1069,7 +1066,6 @@ export default {
             } else {
               this.$refs.intercom.closeVideoModel(true);
             }
-            this.setDisableTab(false);
           }
         } else if (info.type == this.$config.controlType.RADIO) {
           // 广播分机连接状态
@@ -1193,15 +1189,15 @@ export default {
             }
           }
         } else if (info.type == this.$config.controlType.DEVICE) {
+          let content = {
+            content: info.extend,
+          };
           if (info.msg == "0") {
-            let options = {
-              content: info.extend,
-            };
-            getApp().globalData.Base.speech(options);
             console.log("开始语音播报");
+            getApp().globalData.Base.speech(content);
           } else if (info.msg == "1") {
-            getApp().globalData.Base.speechStop();
             console.log("停止语音播报");
+            getApp().globalData.Base.speechStop();
           } else if (info.msg == "2") {
             console.log("设备校时");
             this.timing = info.extend;
@@ -1257,7 +1253,7 @@ export default {
             getApp().globalData.FloatUniModule.openGuard(0);
             console.log("关闭守护成功");
           } else if (info.msg == "13") {
-            Log.uploadLogFile(info.extend);
+            Log.uploadLogFile(content.content);
           } else if (info.msg == "15") {
             // 打开设备ADB
             getApp().globalData.UpdateApp.shell(
@@ -1351,9 +1347,8 @@ export default {
           tabList[2] = tabs.includes("radio") ? 1 : 0;
           tabList[3] = tabs.includes("audio") ? 1 : 0;
           tabList[4] = tabs.includes("video") ? 1 : 0;
-          tabList[5] = tabs.includes("call") ? 1 : 0;
-          tabList[6] = tabs.includes("setting") ? 1 : 0;
-          tabList[7] = tabs.includes("control") ? 1 : 0;
+          tabList[5] = tabs.includes("setting") ? 1 : 0;
+          tabList[6] = tabs.includes("control") ? 1 : 0;
           this.setTabList(tabList);
           this.setMenuList(menuList);
         }

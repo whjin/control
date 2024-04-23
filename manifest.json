@@ -1,9 +1,9 @@
 {
     "name" : "管控主机",
     "appid" : "__UNI__EAA3DC7",
-    "description" : "管控主机系统（来邦）",
-    "versionName" : "4.4.0",
-    "versionCode" : 440,
+    "description" : "管控主机系统（主机-花都）",
+    "versionName" : "1.0.6",
+    "versionCode" : 106,
     "transformPx" : false,
     /* 5+App特有相关 */
     "app-plus" : {

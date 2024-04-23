@@ -1,5 +1,7 @@
 export default {
-  // 主页
+  BASEURL: "",
+  ESURI: "http://localhost:8081/api/",
+
   index: {
     // 获取APP配置菜单
     getAppModuleConf: "terminal/terAppModuleConf/getAppModuleConf",
@@ -63,12 +65,9 @@ export default {
     getTerminalBySip: "terminal/terTerminalInfo/getTerminalBySip",
     // 来邦获取录像记录
     getIntercomRecord: "terminal/terControlInfo/getIntercomRecord",
-    // 主机临时点名
-    tempRollCall: "terminal/pacRollCall/tempRollCall",
-    // 查询点名记录
-    findRollCallDetail: "terminal/pacRollCall/findRollCallDetailByParams",
   },
   test: {
+    // 忽略回拨未接来电
     controlOut: "terminal/terElectricalControl/controlOut",
   },
 
@@ -130,6 +129,28 @@ export default {
     } else {
       this.handleShowToast("请先设置基础baseUrl！");
     }
+  },
+
+  /**
+   * 封装请求（async await 封装uni.request）
+   * method		post/get
+   * endpoint		接口方法名
+   * data			所需传递参数
+   * load			是否需要loading
+   */
+  async apiEsCall(method, endpoint, data, load) {
+    let fullUrl = this.ESURI + endpoint;
+    let Authorization = "";
+    let [error, res] = await uni.request({
+      url: fullUrl,
+      data: data,
+      method: method,
+      header: {
+        "content-Type": "application/x-www-form-urlencoded",
+        Authorization: Authorization || "",
+      },
+    });
+    return res.data;
   },
 
   // 消息提示
