@@ -1,2 +1,2 @@
-# uniapp-control-app
+# control
 uniapp control app
