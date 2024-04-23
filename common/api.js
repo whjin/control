@@ -1,7 +1,5 @@
 export default {
-  BASEURL: "",
-  ESURI: "http://localhost:8081/api/",
-
+  // 主页
   index: {
     // 获取APP配置菜单
     getAppModuleConf: "terminal/terAppModuleConf/getAppModuleConf",
@@ -10,7 +8,7 @@ export default {
     // 获取首页动态信息
     getDynamicInfo: "terminal/common/getRoomDynamicInfo",
     // 新增音视频动态信息
-    setDynamicInfo: "terminal/terOperationInfo/save",
+    saveDynamicInfo: "terminal/terOperationInfo/save",
     // 获取在线报警数
     getOnlineAlermInfo: "terminal/alarm/getAreaOnLineAndAlarmInfo",
     // 获取所有报警数
@@ -62,33 +60,16 @@ export default {
     // 获取广播|音视频播放信息
     getMediaStatusInfo: "terminal/pacRoomInfo/getRoomStatus",
     // 根据来邦slaveNum获取分机信息
-    getTerminalBySip: "terminal/terTerminalInfo/getTerminalBySip?sip=",
-    // 获取应急报警信息
-    saveAlarmInfo: "terminal/alarm/saveAlarmInfo",
+    getTerminalBySip: "terminal/terTerminalInfo/getTerminalBySip",
     // 来邦获取录像记录
-    getIntercomRecord: "terminal/terControlInfo/getIntercomRecord?dateString=",
+    getIntercomRecord: "terminal/terControlInfo/getIntercomRecord",
+    // 主机临时点名
+    tempRollCall: "terminal/pacRollCall/tempRollCall",
+    // 查询点名记录
+    findRollCallDetail: "terminal/pacRollCall/findRollCallDetailByParams",
   },
   test: {
-    // 忽略回拨未接来电
     controlOut: "terminal/terElectricalControl/controlOut",
-  },
-
-  /**
-   * 接口测试
-   */
-  async testCall(method, data) {
-    const [err, res] = await uni.request({
-      url: "http://192.168.1.121:8091/permission/terminalCertification",
-      data: {
-        data: {
-          uuid: "22222",
-        },
-      },
-      method: "post",
-    });
-    console.log("request err", err);
-    console.log("request res", res);
-    return res;
   },
 
   /**
@@ -149,28 +130,6 @@ export default {
     } else {
       this.handleShowToast("请先设置基础baseUrl！");
     }
-  },
-
-  /**
-   * 封装请求（async await 封装uni.request）
-   * method		post/get
-   * endpoint		接口方法名
-   * data			所需传递参数
-   * load			是否需要loading
-   */
-  async apiEsCall(method, endpoint, data, load) {
-    let fullUrl = this.ESURI + endpoint;
-    let Authorization = "";
-    let [error, res] = await uni.request({
-      url: fullUrl,
-      data: data,
-      method: method,
-      header: {
-        "content-Type": "application/x-www-form-urlencoded",
-        Authorization: Authorization || "",
-      },
-    });
-    return res.data;
   },
 
   // 消息提示

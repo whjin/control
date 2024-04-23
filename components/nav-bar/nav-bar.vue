@@ -20,7 +20,7 @@
 			// 标题内容
 			title: {
 				type: String,
-				default: "监室智能管理终端系统"
+				default: "监室智能管理终端"
 			}
 		},
     data() {

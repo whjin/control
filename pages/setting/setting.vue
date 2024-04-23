@@ -25,23 +25,14 @@
         <scroll-view scroll-y="true" class="device-menu-scroll">
           <ul>
             <li @click="showNavigationBar">显示状态栏</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="hideNavigationBar">隐藏状态栏</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="openModal('RestartDev')">设备重启</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="openModal('RestartApp')">应用重启</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="openModal('ConfigInfo')">同步配置信息</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="getUpdateAppInfo(0)">升级APP</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="echoCalibrate">回声校准</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="openCrashHandle">开启守护</li>
-            <div class="page-horizontal-divider"></div>
             <li @click="closeCrashHandle">关闭守护</li>
-            <div class="page-horizontal-divider"></div>
           </ul>
         </scroll-view>
       </div>
@@ -54,7 +45,9 @@
         </div>
         <div class="common-modal-button">
           <div class="btn-cancel" @click="closeModal('RestartDev')">取消</div>
-          <div class="btn-confirm" @touchstart.stop="handleRestartDev">确定</div>
+          <div class="btn-confirm" @touchstart.stop="handleRestartDev">
+            确定
+          </div>
         </div>
       </div>
     </neil-modal>
@@ -66,7 +59,9 @@
         </div>
         <div class="common-modal-button">
           <div class="btn-cancel" @click="closeModal('RestartApp')">取消</div>
-          <div class="btn-confirm" @touchstart.stop="handleRestartApp">确定</div>
+          <div class="btn-confirm" @touchstart.stop="handleRestartApp">
+            确定
+          </div>
         </div>
       </div>
     </neil-modal>
@@ -116,7 +111,7 @@ export default {
     uniGrid,
     uniGridItem,
   },
-  data () {
+  data() {
     return {
       // 系统菜单弹框
       showSystemMenu: false,
@@ -141,36 +136,32 @@ export default {
     };
   },
   methods: {
-    setMenuClick (index) {
+    setMenuClick(index) {
       this.selectedIndex = index;
       if (index == 0) {
         this.showSystemMenu = true;
       }
     },
     // 显示状态栏
-    showNavigationBar () {
-    },
+    showNavigationBar() { },
     // 隐藏状态栏
-    hideNavigationBar () {
-    },
+    hideNavigationBar() { },
     // 重启设备
-    handleRestartDev () {
-      uni.closeSocket();
+    handleRestartDev() {
       getApp().globalData.FloatUniModule.rebootSystem();
+      uni.closeSocket();
     },
     // 重启应用
-    handleRestartApp () {
-      // #ifdef APP-PLUS
-      plus.runtime.restart();
-      // #endif
+    handleRestartApp() {
+      this.$parent.handleRestartApp();
     },
     // 同步配置信息
-    configInfoSync () {
+    configInfoSync() {
       this.$parent.syncSystemInfo();
       this.showConfigInfo = false;
     },
     // 升级APP
-    async getUpdateAppInfo (type) {
+    async getUpdateAppInfo(type) {
       let params = {
         data: {
           versionCode: plus.runtime.versionCode,
@@ -178,7 +169,7 @@ export default {
         },
       };
       let res = await Api.apiCall("post", Api.index.getUpdateInfo, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         switch (type) {
           case 0:
             this.appVersion = plus.runtime.version;
@@ -203,22 +194,25 @@ export default {
       }
     },
     // 下载更新APP
-    handleUpdateApp () {
+    handleUpdateApp() {
       plus.io.resolveLocalFileSystemURL(
         "/sdcard/Download/update.apk",
         (entry) => {
           console.log("安装包已存在");
-          plus.io.resolveLocalFileSystemURL("/sdcard/Download/update.apk", (entry) => {
-            entry.remove(
-              (res) => {
-                console.log("删除文件成功");
-                this.updateControl();
-              },
-              (err) => {
-                console.log("删除文件失败");
-              }
-            );
-          });
+          plus.io.resolveLocalFileSystemURL(
+            "/sdcard/Download/update.apk",
+            (entry) => {
+              entry.remove(
+                (res) => {
+                  console.log("删除文件成功");
+                  this.updateControl();
+                },
+                (err) => {
+                  console.log("删除文件失败");
+                }
+              );
+            }
+          );
         },
         (err) => {
           console.log("文件夹为空");
@@ -227,50 +221,52 @@ export default {
       );
     },
     // 下载安装APP
-    updateControl () {
+    updateControl() {
       plus.nativeUI.showWaiting("安装包下载中，请稍候...");
       plus.downloader
-        .createDownload(this.downloadUrl, { filename: "/sdcard/Download/update.apk" }, (d, status) => {
-          plus.nativeUI.closeWaiting();
-          if (status == 200) {
-            console.log("下载成功：" + d.filename);
-            getApp().globalData.UpdateApp.install(d.filename, (res) => {
-              if (res.state) {
-                console.log("APP安装成功");
-                Log.writeLog("APP安装成功", false);
-              } else {
-                console.log("APP安装失败");
-                Log.writeLog("APP安装失败", false);
-              }
-            });
-          } else {
-            console.log("安装包下载失败");
-            Log.writeLog("安装包下载失败", false);
+        .createDownload(
+          this.downloadUrl,
+          { filename: "/sdcard/Download/update.apk" },
+          (d, status) => {
+            plus.nativeUI.closeWaiting();
+            if (status == 200) {
+              getApp().globalData.UpdateApp.install(d.filename, (res) => {
+                if (res.state) {
+                  console.log("APP安装成功");
+                  Log.writeLog("APP安装成功", false);
+                } else {
+                  console.log("APP安装失败");
+                  Log.writeLog("APP安装失败", false);
+                }
+              });
+            } else {
+              console.log("安装包下载失败");
+              Log.writeLog("安装包下载失败", false);
+            }
           }
-        })
+        )
         .start();
     },
     // 回声校准
-    echoCalibrate () {
-    },
+    echoCalibrate() { },
     // 开启守护
-    openCrashHandle () {
+    openCrashHandle() {
       getApp().globalData.FloatUniModule.openGuard(1);
       console.log("主机开启守护成功");
       Log.writeLog("主机开启守护成功", false);
     },
     // 关闭守护
-    closeCrashHandle () {
+    closeCrashHandle() {
       getApp().globalData.FloatUniModule.openGuard(0);
       console.log("主机关闭守护成功");
       Log.writeLog("主机关闭守护成功", false);
     },
     // 打开弹框
-    openModal (type) {
+    openModal(type) {
       this[`show${type}`] = true;
     },
     // 关闭弹框
-    closeModal (type) {
+    closeModal(type) {
       this[`show${type}`] = false;
       if (type == "UpdateApp") {
         this.disabledClick = false;
@@ -281,5 +277,5 @@ export default {
 </script>
 
 <style lang="less">
-@import '../../common/less/index.less';
+@import "../../common/less/index.less";
 </style>

@@ -1,42 +1,45 @@
 <template>
-  <div class="home-container">
-    <div class="home-wrapper">
-      <div class="home-content-left">
-        <div class="home-content-wrapper">
-          <div class="home-content-box">
-            <div class="home-content-header">
-              <text>在线报警情况</text>
-            </div>
-            <div class="home-content-one">
-              <div class="content-one-list">
-                <div class="rectangle-active-img content-one-item">
-                  <text class="content-text">主机在线情况</text>
-                  <view class="content-num">
-                    <view class="content-num-one">{{
+	<div class="home-container">
+		<div class="home-wrapper">
+			<div class="home-content-left">
+				<div class="home-content-wrapper">
+					<div class="home-content-box">
+						<div class="home-content-header">
+							<text>在线报警情况</text>
+						</div>
+						<div class="home-content-one">
+							<div class="content-one-list">
+								<div class="rectangle-active-img content-one-item">
+									<text class="content-text">主机在线情况</text>
+									<view class="content-num">
+										<view class="content-num-one">{{
                       onlineAlarmList.controlOnLine || 0
                     }}</view>
-                    <view class="content-num-two">{{
+										<view class="content-num-two">{{
                       `/${onlineAlarmList.controlCount || 0}`
                     }}</view>
                   </view>
                   <view class="content-total">在线数/总数</view>
                 </div>
-                <view class="rectangle-active-img content-one-item" @click="handleShowTerminalStateDialog">
+                <view
+                  class="rectangle-active-img content-one-item"
+                  @click="handleShowTerminalStateDialog"
+                >
                   <text class="content-text">分机在线情况</text>
                   <view class="content-num">
                     <view class="content-num-one">{{
                       onlineAlarmList.terminalOnLine || 0
                     }}</view>
-                    <view class="content-num-two">{{
+										<view class="content-num-two">{{
                       `/${onlineAlarmList.terminalCount || 0}`
                     }}</view>
-                  </view>
-                  <view class="content-total">在线数/总数</view>
-                </view>
-                <view class="rectangle-active-img content-one-item">
-                  <text class="content-text">报警情况</text>
-                  <view class="content-num">
-                    <view class="content-num-one">{{
+									</view>
+									<view class="content-total">在线数/总数</view>
+								</view>
+								<view class="rectangle-active-img content-one-item">
+									<text class="content-text">报警情况</text>
+									<view class="content-num">
+										<view class="content-num-one">{{
                       onlineAlarmList.intraDayAlarmNumber || 0
                     }}</view>
                   </view>
@@ -52,7 +55,12 @@
             <div class="home-content-two">
               <div class="content-two-list">
                 <div class="content-title"><text>报警数量</text></div>
-                <canvas canvas-id="canvasColumn" id="canvasColumn" class="charts" @touchstart="touchColumn"></canvas>
+                <canvas
+                  canvas-id="canvasColumn"
+                  id="canvasColumn"
+                  class="charts"
+                  @touchstart="touchColumn"
+                ></canvas>
               </div>
             </div>
           </div>
@@ -62,20 +70,34 @@
               <div class="state-bar">
                 <block v-for="(item, index) in piearr" :key="index">
                   <div class="state-bar-item">
-                    <div class="point" :style="{ 'background-color': item.color }"></div>
+                    <div
+                      class="point"
+                      :style="{ 'background-color': item.color }"
+                    ></div>
                     <div class="text">{{ item.name }}</div>
                   </div>
                 </block>
               </div>
             </div>
-            <div class="home-content-three" :class="{'canvas-pie-center':canvasPieState}">
+            <div
+              class="home-content-three"
+              :class="{ 'canvas-pie-center': canvasPieState }"
+            >
               <div class="content-three-list">
-                <div class="content-three-item" v-for="(item, index) in onlineStatusList" :key="index">
+                <div
+                  class="content-three-item"
+                  v-for="(item, index) in onlineStatusList"
+                  :key="index"
+                >
                   <text class="rectangle-active-img content-text">{{
                     item.areaName
                   }}</text>
                   <div class="charts-pie-box">
-                    <canvas :canvas-id="'canvasPie'+index" class="canvas-pie" @touchstart="touchPie($event,index)"></canvas>
+                    <canvas
+                      :canvas-id="'canvasPie' + index"
+                      class="canvas-pie"
+                      @touchstart="touchPie($event, index)"
+                    ></canvas>
                   </div>
                 </div>
               </div>
@@ -88,7 +110,12 @@
             <view class="home-content-four">
               <view class="content-four-list">
                 <div class="content-title"><text>报警数量</text></div>
-                <canvas canvas-id="canvasColumnE" id="canvasColumnE" class="charts" @touchstart="touchColumnE"></canvas>
+                <canvas
+                  canvas-id="canvasColumnE"
+                  id="canvasColumnE"
+                  class="charts"
+                  @touchstart="touchColumnE"
+                ></canvas>
               </view>
             </view>
           </div>
@@ -100,60 +127,68 @@
         </scroll-view>
       </div>
     </div>
-    <tableDialog :isShow="showTerminalStateDialog" title="分机在线详情" :headers="terminalOnlineStateList.headers" :contents="terminalOnlineStateList.contents" @scrolltolower="handleTerminalStateScrolltolower" @clickHeadItem="handleTerminalStateSort" @close="handleTerminalStateDialogClose"></tableDialog>
+    <tableDialog
+      :isShow="showTerminalStateDialog"
+      title="分机在线详情"
+      :headers="terminalOnlineStateList.headers"
+      :contents="terminalOnlineStateList.contents"
+      @scrolltolower="handleTerminalStateScrolltolower"
+      @clickHeadItem="handleTerminalStateSort"
+      @close="handleTerminalStateDialogClose"
+    ></tableDialog>
   </div>
 </template>
 <script>
-import Api from '@/common/api.js';
-import vtimeLine from '@/components/v-timeLine/v-timeLine.vue';
-import tableDialog from '@/components/table-dialog/table-dialog.vue';
-import uCharts from '@/components/u-charts/u-charts.js';
-import { dateFormat } from '@/common/utils/util.js';
+import Api from "@/common/api.js";
+import vtimeLine from "@/components/v-timeLine/v-timeLine.vue";
+import tableDialog from "@/components/table-dialog/table-dialog.vue";
+import uCharts from "@/components/u-charts/u-charts.js";
+import { dateFormat } from "@/common/utils/util.js";
 
 let canvaColumn = null;
 let canvaColumnE = null;
 let canvasPieData = null;
 
 export default {
-  name: 'indexMain',
+  name: "indexMain",
   components: {
     vtimeLine,
-    tableDialog
+    tableDialog,
   },
-  data () {
+  data() {
     return {
       ChartsList: [],
-      cWidth: '',
-      cHeight: '',
+      cWidth: "",
+      cHeight: "",
       pixelRatio: 1,
       serverData: {
         Column: {
           categories: [],
           series: [
             {
-              name: '报警数量',
+              name: "报警数量",
               data: [],
-              type: 'column'
-            }
-          ]
-        }
+              type: "column",
+            },
+          ],
+        },
       },
       serverDataE: {
         Column: {
           categories: [],
           series: [
             {
-              name: '报警数量',
+              name: "报警数量",
               data: [],
-              type: 'column'
-            }
-          ]
-        }
+              type: "column",
+            },
+          ],
+        },
       },
-      pWidth: '',
-      pHeight: '',
+      pWidth: "",
+      pHeight: "",
       pieData: {
-        series: []
+        series: [],
       },
       piearr: {},
       // 在线报警信息
@@ -173,83 +208,84 @@ export default {
             key: "status",
             sortConfig: {
               sort: true,
-              sortType: 'asc'
-            }
+              sortType: "asc",
+            },
           },
           {
             label: "分机名称",
             key: "terminalName",
             sortConfig: {
               sort: false,
-              sortType: ''
-            }
+              sortType: "",
+            },
           },
           {
             label: "分机类型",
             key: "terminalType",
             sortConfig: {
               sort: true,
-              sortType: ''
-            }
+              sortType: "",
+            },
           },
           {
             label: "监室名称",
             key: "roomName",
             sortConfig: {
               sort: true,
-              sortType: ''
-            }
+              sortType: "",
+            },
           },
           {
             label: "监区名称",
             key: "areaName",
             sortConfig: {
               sort: false,
-              sortType: ''
-            }
+              sortType: "",
+            },
           },
           {
             label: "分机IP",
             key: "terminalIp",
             sortConfig: {
               sort: false,
-              sortType: ''
-            }
-          }
+              sortType: "",
+            },
+          },
         ],
         // 列表内容
         contents: [],
         // 获取列表参数
         params: {
           data: {
-            areaId: uni.getStorageSync("controlInfo").areaId || '',
-            orderField: 'status',
-            orderType: 'asc'
+            areaId: uni.getStorageSync("controlInfo").areaId || "",
+            orderField: "status",
+            orderType: "asc",
           },
           pageParam: {
             pageIndex: 1,
-            pageSize: 500
-          }
+            pageSize: 500,
+          },
         },
-        total: 0
-      }
+        total: 0,
+      },
     };
   },
   computed: {
-    statusList () {
+    statusList() {
       let pieList = [];
-      this.onlineStatusList.map(item => {
+      this.onlineStatusList.map((item) => {
         pieList.push(item.data);
       });
       return pieList;
     },
-    canvasPieState () {
-      return this.onlineStatusList.length == 1
-        || this.onlineStatusList.length == 2;
-    }
+    canvasPieState() {
+      return (
+        this.onlineStatusList.length == 1 || this.onlineStatusList.length == 2
+      );
+    },
   },
-  created () {
-    if (!!uni.getStorageSync('baseUrl')) {
+  created() {
+    if (!!uni.getStorageSync("baseUrl")) {
       // 获取在线报警情况
       this.getOnlineAlermInfo();
       // 获取分机在线离线图
@@ -268,56 +304,56 @@ export default {
     }
   },
   watch: {
-    onlineStatusList () {
+    onlineStatusList() {
       this.statusList.map((item, index) => {
-        this.pieData.series = [{ name: '在线', data: item.onLine }, { name: '离线', data: item.offLine }];
+        this.pieData.series = [
+          { name: "在线", data: item.onLine },
+          { name: "离线", data: item.offLine },
+        ];
         let chartData = [];
         chartData = this.pieData.series;
         this.showPie(`canvasPie${index}`, chartData);
       });
-    }
+    },
   },
   methods: {
     // 获取在线报情况
-    async getOnlineAlermInfo () {
+    async getOnlineAlermInfo() {
+      const { controlCode } = uni.getStorageSync("controlInfo");
       let params = {
         id: uni.getStorageSync("controlInfo").areaId,
-        controlCode: uni.getStorageSync("controlInfo").code
+        controlCode,
       };
       let res = await Api.apiCall("get", Api.index.getOnlineAlermInfo, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         this.onlineAlarmList = res.data;
       }
     },
     // 获取监区分机在线离线信息
-    async getAreaOnlineStatus () {
+    async getAreaOnlineStatus() {
       let params = {
-        id: uni.getStorageSync("controlInfo").areaId
+        id: uni.getStorageSync("controlInfo").areaId,
       };
-      let res = await Api.apiCall(
-        "get",
-        Api.index.getAreaOnlineStatus,
-        params
-      );
-      if (res.state.code == "200") {
+      let res = await Api.apiCall("get", Api.index.getAreaOnlineStatus, params);
+      if (res.state.code == 200) {
         this.onlineStatusList = res.data;
       }
     },
     // 获取报警数走势图
-    async getAllAlerm () {
+    async getAllAlerm() {
       let params = {
-        id: uni.getStorageSync("controlInfo").areaId
+        id: uni.getStorageSync("controlInfo").areaId,
       };
-      let res = await Api.apiCall('get', Api.index.getAllAlarm, params);
-      if (res.state.code == '200') {
+      let res = await Api.apiCall("get", Api.index.getAllAlarm, params);
+      if (res.state.code == "200") {
         // 获取横坐标日期
         let dateList = [];
-        res.data.map(item => {
-          dateList.push(dateFormat('MM-DD', new Date(item.alarmDate)));
+        res.data.map((item) => {
+          dateList.push(dateFormat("MM-DD", new Date(item.alarmDate)));
         });
         this.serverData.Column.categories = dateList;
-        this.serverData.Column.series.map(item => {
-          res.data.map(num => {
+        this.serverData.Column.series.map((item) => {
+          res.data.map((num) => {
             item.data.push(num.alarmNumber);
           });
         });
@@ -325,20 +361,20 @@ export default {
       }
     },
     // 获取分机报警数
-    async getTerminalAlarm () {
+    async getTerminalAlarm() {
       let params = {
-        id: uni.getStorageSync("controlInfo").areaId
+        id: uni.getStorageSync("controlInfo").areaId,
       };
-      let res = await Api.apiCall('get', Api.index.getTerminalAlarm, params);
-      if (res.state.code == '200') {
+      let res = await Api.apiCall("get", Api.index.getTerminalAlarm, params);
+      if (res.state.code == "200") {
         // 获取分机横坐标监室号
         let prisonList = [];
-        res.data.map(item => {
+        res.data.map((item) => {
           prisonList.push(item.roomName);
         });
         this.serverDataE.Column.categories = prisonList;
-        this.serverDataE.Column.series.map(item => {
-          res.data.map(num => {
+        this.serverDataE.Column.series.map((item) => {
+          res.data.map((num) => {
             item.data.push(num.alarmNumber);
           });
         });
@@ -347,43 +383,41 @@ export default {
     },
 
     // 获取动态信息
-    async getDynamicInfo (showTips) {
+    async getDynamicInfo(showTips) {
       let controlId = uni.getStorageSync("controlInfo").id;
-      let res = await Api.apiCall(
-        "get",
-        Api.index.getDynamicInfo,
-        { controlId: controlId }
-      );
-      if (res.state.code == "200") {
+      let res = await Api.apiCall("get", Api.index.getDynamicInfo, {
+        controlId: controlId,
+      });
+      if (res.state.code == 200) {
         if (showTips) {
           this.$parent.handleShowToast("刷新成功！");
         }
         this.messageList = res.data;
-        this.messageList.map(item => {
+        this.messageList.map((item) => {
           item.warning = ["500", "700"].includes(item.type) ? true : false;
         });
       }
     },
     // 表格渲染
-    getServerData () {
+    getServerData() {
       let Column = { categories: [], series: [] };
       Column.categories = this.serverData.Column.categories;
       Column.series = this.serverData.Column.series;
-      this.showColumn('canvasColumn', Column);
+      this.showColumn("canvasColumn", Column);
       let ColumnE = { categories: [], series: [] };
       ColumnE.categories = this.serverDataE.Column.categories;
       ColumnE.series = this.serverDataE.Column.series;
-      this.showColumnE('canvasColumnE', ColumnE);
+      this.showColumnE("canvasColumnE", ColumnE);
     },
     // 饼图
-    showPie (canvasId, chartData) {
+    showPie(canvasId, chartData) {
       canvasPieData = new uCharts({
         $this: this,
         canvasId: canvasId,
-        type: 'pie',
+        type: "pie",
         fontSize: 20,
         legend: { show: false },
-        background: '#ffffff',
+        background: "#ffffff",
         pixelRatio: this.pixelRatio,
         series: chartData,
         animation: true,
@@ -393,30 +427,30 @@ export default {
         padding: [15, 15, 15, 15],
         extra: {
           pie: {
-            lableWidth: 15
-          }
-        }
+            lableWidth: 15,
+          },
+        },
       });
       this.ChartsList.push(canvasPieData);
       this.piearr = canvasPieData.opts.series;
     },
     // 点击饼图查看详情
-    touchPie (e, index) {
+    touchPie(e, index) {
       this.ChartsList[index].showToolTip(e, {
         format: function (item) {
-          return item.name + ':' + item.data;
-        }
+          return item.name + ":" + item.data;
+        },
       });
     },
-    showColumn (canvasId, chartData) {
+    showColumn(canvasId, chartData) {
       canvaColumn = new uCharts({
         $this: this,
         canvasId: canvasId,
-        type: 'mix',
+        type: "mix",
         legend: { show: false },
         fontSize: 20,
         color: "#fff",
-        background: '#fff',
+        background: "#fff",
         pixelRatio: this.pixelRatio,
         animation: true,
         categories: chartData.categories,
@@ -424,25 +458,25 @@ export default {
         xAxis: {
           disableGrid: true,
           scrollShow: true, //新增是否显示滚动条，默认false
-          scrollAlign: 'left', //滚动条初始位置
-          scrollBackgroundColor: '#F7F7FF', //默认为 #EFEBEF
-          scrollColor: '#DEE7F7', //默认为 #A6A6A6
-          fontColor: '#fff',
+          scrollAlign: "left", //滚动条初始位置
+          scrollBackgroundColor: "#F7F7FF", //默认为 #EFEBEF
+          scrollColor: "#DEE7F7", //默认为 #A6A6A6
+          fontColor: "#fff",
           fontSize: 20,
         },
         yAxis: {
-          gridColor: 'rgba(66,164,255,1)',
+          gridColor: "rgba(66,164,255,1)",
           data: [
             {
-              fontColor: '#fff',
+              fontColor: "#fff",
               max: 30,
               min: 0,
               fontSize: 20,
-              format: val => {
+              format: (val) => {
                 return val.toFixed(0);
-              }
-            }
-          ]
+              },
+            },
+          ],
         },
         dataLabel: true,
         dataPointShape: true,
@@ -450,38 +484,40 @@ export default {
         height: this.cHeight * this.pixelRatio,
         extra: {
           column: {
-            type: 'group',
-            width: (this.cWidth * this.pixelRatio * 0.45) / chartData.categories.length,
+            type: "group",
+            width:
+              (this.cWidth * this.pixelRatio * 0.45) /
+              chartData.categories.length,
             meter: {
-              fillColor: '#1890ff'
-            }
+              fillColor: "#1890ff",
+            },
           },
           tooltip: {
-            bgColor: '#000000',
+            bgColor: "#000000",
             bgOpacity: 0.7,
-            gridType: 'dash',
+            gridType: "dash",
             dashLength: 8,
-            gridColor: '#1890ff',
-            fontColor: '#FFFFFF',
+            gridColor: "#1890ff",
+            fontColor: "#FFFFFF",
             horizentalLine: true,
             xAxisLabel: true,
             yAxisLabel: true,
-            labelBgColor: '#DFE8FF',
+            labelBgColor: "#DFE8FF",
             labelBgOpacity: 0.95,
-            labelAlign: 'left',
-            labelFontColor: '#666'
-          }
-        }
+            labelAlign: "left",
+            labelFontColor: "#666",
+          },
+        },
       });
     },
-    showColumnE (canvasId, chartData) {
+    showColumnE(canvasId, chartData) {
       canvaColumnE = new uCharts({
         $this: this,
         canvasId: canvasId,
-        type: 'mix',
+        type: "mix",
         legend: { show: false },
         fontSize: 20,
-        background: '#fff',
+        background: "#fff",
         textColor: "#fff",
         pixelRatio: this.pixelRatio,
         animation: true,
@@ -490,25 +526,25 @@ export default {
         xAxis: {
           disableGrid: true,
           scrollShow: true, //新增是否显示滚动条，默认false
-          scrollAlign: 'left', //滚动条初始位置
-          scrollBackgroundColor: '#F7F7FF', //默认为 #EFEBEF
-          scrollColor: '#DEE7F7', //默认为 #A6A6A6
-          fontColor: '#fff',
+          scrollAlign: "left", //滚动条初始位置
+          scrollBackgroundColor: "#F7F7FF", //默认为 #EFEBEF
+          scrollColor: "#DEE7F7", //默认为 #A6A6A6
+          fontColor: "#fff",
           fontSize: 20,
         },
         yAxis: {
-          gridColor: 'rgba(66,164,255,1)',
+          gridColor: "rgba(66,164,255,1)",
           data: [
             {
-              fontColor: '#fff',
+              fontColor: "#fff",
               max: 30,
               min: 0,
               fontSize: 20,
-              format: val => {
+              format: (val) => {
                 return val.toFixed(0);
-              }
-            }
-          ]
+              },
+            },
+          ],
         },
         dataLabel: true,
         dataPointShape: true,
@@ -516,94 +552,104 @@ export default {
         height: this.cHeight * this.pixelRatio,
         extra: {
           column: {
-            type: 'group',
-            width: (this.cWidth * this.pixelRatio * 0.45) / chartData.categories.length,
+            type: "group",
+            width:
+              (this.cWidth * this.pixelRatio * 0.45) /
+              chartData.categories.length,
             meter: {
-              fillColor: '#1890ff'
-            }
+              fillColor: "#1890ff",
+            },
           },
           tooltip: {
-            bgColor: '#000',
+            bgColor: "#000",
             bgOpacity: 0.7,
-            gridType: 'dash',
+            gridType: "dash",
             dashLength: 8,
-            gridColor: '#1890ff',
-            fontColor: '#fff',
+            gridColor: "#1890ff",
+            fontColor: "#fff",
             horizentalLine: true,
             xAxisLabel: true,
             yAxisLabel: true,
-            labelBgColor: '#DFE8FF',
+            labelBgColor: "#DFE8FF",
             labelBgOpacity: 0.95,
-            labelAlign: 'left',
-            labelFontColor: '#666'
-          }
-        }
+            labelAlign: "left",
+            labelFontColor: "#666",
+          },
+        },
       });
     },
-    touchColumn (e) {
+    touchColumn(e) {
       canvaColumn.showToolTip(e, {
         format: function (item, category) {
-          return category + ' ' + item.name + ':' + item.data;
-        }
+          return category + " " + item.name + ":" + item.data;
+        },
       });
     },
-    touchColumnE (e) {
+    touchColumnE(e) {
       canvaColumnE.showToolTip(e, {
         format: function (item, category) {
-          return category + ' ' + item.name + ':' + item.data;
-        }
+          return category + " " + item.name + ":" + item.data;
+        },
       });
     },
     // 获取分机在线列表
-    async getTerminalOnlineStateList () {
-      let res = await Api.apiCall('post', Api.index.terminalOnlineStatusInfo, this.terminalOnlineStateList.params);
+    async getTerminalOnlineStateList() {
+      let res = await Api.apiCall(
+        "post",
+        Api.index.terminalOnlineStatusInfo,
+        this.terminalOnlineStateList.params
+      );
       uni.hideLoading();
       if (res.state.code === 200) {
         if (res.data && res.data.length) {
           this.terminalOnlineStateList.total = res.page.total;
-          let list = res.data.map(item => {
-            item.status = item.status ? '在线' : '离线';
-            item.terminalType = item.terminalType ? '仓外屏' : '仓内屏';
+          let list = res.data.map((item) => {
+            item.status = item.status ? "在线" : "离线";
+            item.terminalType = item.terminalType ? "仓外屏" : "仓内屏";
             return item;
           });
           if (res.page.pageIndex === 1) {
             this.terminalOnlineStateList.contents = list;
           } else {
-            this.terminalOnlineStateList.contents = this.terminalOnlineStateList.contents.concat(list);
+            this.terminalOnlineStateList.contents =
+              this.terminalOnlineStateList.contents.concat(list);
           }
         }
       }
     },
     // 显示分机在线列表弹框
-    handleShowTerminalStateDialog () {
+    handleShowTerminalStateDialog() {
       this.showTerminalStateDialog = true;
       this.getTerminalOnlineStateList();
     },
     // 分机在线列表上拉加载
-    handleTerminalStateScrolltolower () {
-      if (this.terminalOnlineStateList.contents.length >= this.terminalOnlineStateList.total) {
+    handleTerminalStateScrolltolower() {
+      if (
+        this.terminalOnlineStateList.contents.length >=
+        this.terminalOnlineStateList.total
+      ) {
         uni.showToast({
-          title: '没有更多的内容',
-          icon: 'none',
-          duration: 3000
+          title: "没有更多的内容",
+          icon: "none",
+          duration: 3000,
         });
       } else {
         uni.showToast({
-          title: '数据加载中',
-          icon: 'none',
-          duration: 3000
+          title: "数据加载中",
+          icon: "none",
+          duration: 3000,
         });
         this.terminalOnlineStateList.params.pageParam.pageIndex += 1;
         this.getTerminalOnlineStateList();
       }
     },
     // 分机在线列表排序
-    handleTerminalStateSort (info) {
+    handleTerminalStateSort(info) {
       if (info.sortConfig && info.sortConfig.sort) {
         // 切换排序字段
         let sortField = info.key;
         // 切换排序方式
-        let sortType = info.sortConfig.sortType === 'asc' ? 'desc' : 'asc';
+        let sortType = info.sortConfig.sortType === "asc" ? "desc" : "asc";
         // 重置列表 & 请求参数
         this.terminalOnlineStateList.contents = [];
         this.resetTerminalOnlineStateListParam(sortField, sortType);
@@ -612,18 +658,18 @@ export default {
       }
     },
     // 关闭分机在线列表弹框
-    handleTerminalStateDialogClose () {
+    handleTerminalStateDialogClose() {
       this.showTerminalStateDialog = false;
       // 重置列表 & 请求参数
       this.terminalOnlineStateList.contents = [];
       this.resetTerminalOnlineStateListParam();
     },
     // 重置分机在线列表头 & 请求参数
-    resetTerminalOnlineStateListParam (sortField, sortType) {
-      let curSortField = sortField || 'status';
-      let curSortType = sortType || 'asc';
-      this.terminalOnlineStateList.headers.map(item => {
-        item.sortConfig.sortType = '';
+    resetTerminalOnlineStateListParam(sortField, sortType) {
+      let curSortField = sortField || "status";
+      let curSortType = sortType || "asc";
+      this.terminalOnlineStateList.headers.map((item) => {
+        item.sortConfig.sortType = "";
         if (item.key === curSortField) {
           item.sortConfig.sortType = curSortType;
         }
@@ -631,20 +677,20 @@ export default {
       });
       this.terminalOnlineStateList.params = {
         data: {
-          areaId: uni.getStorageSync("controlInfo").areaId || '',
-          orderField: curSortField === 'roomName' ? 'roomNo' : curSortField,
-          orderType: curSortType
+          areaId: uni.getStorageSync("controlInfo").areaId || "",
+          orderField: curSortField === "roomName" ? "roomNo" : curSortField,
+          orderType: curSortType,
         },
         pageParam: {
           pageIndex: 1,
-          pageSize: 500
-        }
+          pageSize: 500,
+        },
       };
-    }
-  }
+    },
+  },
 };
 </script>
 
 <style lang="less">
-@import '../../common/less/index.less';
+@import "../../common/less/index.less";
 </style>

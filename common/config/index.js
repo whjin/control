@@ -1,21 +1,11 @@
 export default {
+  // pro
+  // baseUrl: "http://68.155.232.65:8100/",
   // dev
-  // baseUrl: "http://192.168.20.201:8100/",
-  // dev
-  baseUrl: "http://192.168.20.179:8100/",
+  baseUrl: "http://192.168.20.214:8100/",
 
-  controlIP: "192.168.20.103",
-  /*
-   * 基准宽度
-   */
-  baseWidth: 1080,
-  /*
-   * websocket自动重连时间（毫秒）
-   */
-  websocketTime: 8000,
-  /*
-   * 控制模块类型
-   */
+  controlIP: "192.168.20.168",
+
   controlType: {
     HEARTBEAT: "000",
     INTERCOM: "100",
@@ -23,7 +13,7 @@ export default {
     AUDIO: "300",
     VIDEO: "400",
     ALARM: "500",
-    ROLLCALL: "600",
+    CALL: "600",
     DEVICE: "700",
   },
 };

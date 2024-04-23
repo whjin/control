@@ -30,6 +30,12 @@
         "url": "/pages/video/video"
     },
     {
+        "id": 48,
+        "name": "点名",
+        "type": "iconcall",
+        "url": "/pages/call/call"
+    },
+    {
         "id": 46,
         "name": "设置",
         "type": "iconsetting",
@@ -39,6 +45,6 @@
         "id": 47,
         "name": "管控",
         "type": "iconkongzhi",
-        "url": "/pages/control/control"
+        "url": "/pages/manager/manager"
     }
 ]

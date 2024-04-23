@@ -83,14 +83,14 @@ export const unique = (arr) => {
 };
 
 // 数组对象去重
-export const uniqueArr = (arr) => {
+export const uniqueArr = (arr, key) => {
   if (!Array.isArray(arr)) {
     return;
   }
   let map = new Map();
   for (let i = 0, len = arr.length; i < len; i++) {
-    if (!map.has(arr[i].name)) {
-      map.set(arr[i].name, arr[i]);
+    if (!map.has(arr[i][key])) {
+      map.set(arr[i][key], arr[i]);
     }
   }
   return [...map.values()];
@@ -112,27 +112,4 @@ export const readDirectory = (dirPath) => {
       }
     );
   });
-};
-
-// 删除文件夹
-export const removeDirectory = () => {
-  // return new Promise((resolve, reject) => {
-  //   readDirectory("file:///storage/1AB6-BDFF/Rec/").then((entries) => {
-  //     if (entries.length) {
-  //       let date = dateFormat("YYYYMMDD", new Date());
-  //       entries.forEach((entry) => {
-  //         readDirectory(entry.fullPath).then((file) => {
-  //           file.remove(
-  //             (res) => {
-  //               console.log("删除文件成功");
-  //             },
-  //             (err) => {
-  //               console.log("删除文件失败");
-  //             }
-  //           );
-  //         });
-  //       });
-  //     }
-  //   });
-  // });
 };

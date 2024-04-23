@@ -25,13 +25,6 @@
 							"style": {
 								"background": "transparent"
 							}
-						},
-						{
-							"id": "aioVideoView",
-							"path": "pages/bgMain/subnvue/aioVideoView",
-							"style": {
-								"background": "transparent"
-							}
 						}
 					]
 				}

@@ -18,8 +18,9 @@
                 <common-icons type="iconsearch" color="#fff" size="20" @click="searchTerminalRoom"></common-icons>
               </div>
               <div class="terminal-room-box">
-                <scroll-view scroll-y="true" class="terminal-room-scroll">
-                  <v-tree showCheckbox :disabledSelect="disabledSelect" :root="terminalList" :changeHandler="terminalSelect"></v-tree>
+                <scroll-view scroll-y="true">
+                  <v-tree showCheckbox :disabledSelect="audioState" :root="terminalList"
+                    :changeHandler="terminalSelect"></v-tree>
                 </scroll-view>
               </div>
             </div>
@@ -32,7 +33,8 @@
               </div>
               <div class="terminal-room-box">
                 <scroll-view scroll-y="true">
-                  <v-tree ref="vTree" showCheckbox :disabledSelect="disabledSelect" :showGroup="true" :root="groupList" :changeHandler="groupSelect" @group-change="openModifyGroup" @group-delete="openDeleteGroup"></v-tree>
+                  <v-tree ref="vTree" showCheckbox :disabledSelect="audioState" :showGroup="true" :root="groupList"
+                    :changeHandler="groupSelect" @group-change="openModifyGroup" @group-delete="openDeleteGroup"></v-tree>
                 </scroll-view>
               </div>
             </div>
@@ -59,28 +61,30 @@
           <div class="audio-center-content">
             <div class="center-btn-box">
               <div class="center-btn-left">
-                <div class="btn-left" v-show="!audioStatus && currentPage == 0" :class="isAudioAll ? 'btn-active-img' : 'btn-img'" @click="handleSelectAll">
+                <div class="btn-left" v-show="!audioState && currentPage == 0"
+                  :class="isAudioAll ? 'btn-active-img' : 'btn-img'" @click="handleSelectAll">
                   <text>全选</text>
                 </div>
-                <div class="btn-left" v-show="!audioStatus && currentPage == 1" :class="isRoomAll ? 'btn-active-img' : 'btn-img'" @click="handleSelectAll">
+                <div class="btn-left" v-show="!audioState && currentPage == 1"
+                  :class="isRoomAll ? 'btn-active-img' : 'btn-img'" @click="handleSelectAll">
                   <text>全选</text>
                 </div>
-                <div class="btn-left btn-img" v-show="!audioStatus && currentPage == 1" @click="handleRemoveAll">
+                <div class="btn-left btn-img" v-show="!audioState && currentPage == 1" @click="handleRemoveAll">
                   <text>移除</text>
                 </div>
                 <div class="btn-left btn-img" v-show="currentPage == 1" @click="handleAddGroup">
                   <text>添加分组</text>
                 </div>
-                <div class="btn-left btn-img" v-show="audioStatus && currentPage == 1" @click="decreaseVolume">
+                <div class="btn-left btn-img" v-show="audioState && currentPage == 1" @click="decreaseVolume">
                   <text>音量－</text>
                 </div>
-                <div class="btn-left btn-img" v-show="audioStatus && currentPage == 1" @click="increaseVolume">
+                <div class="btn-left btn-img" v-show="audioState && currentPage == 1" @click="increaseVolume">
                   <text>音量＋</text>
                 </div>
               </div>
               <div class="center-btn-right">
                 <div class="btn-right btn-img" @click="handleAudioModal">
-                  <text>{{ audioStatus ? "分机停止" : "分机播放" }}</text>
+                  <text>{{ audioState ? "分机停止" : "分机播放" }}</text>
                 </div>
               </div>
             </div>
@@ -89,8 +93,7 @@
                 <div class="audio-table-box">
                   <div class="table-head">
                     <div class="head-checkbox" @click="checkAudioAll">
-                      <common-icons :type="
-                          isAudioAll ? 'iconcheckbox' : 'iconcheck-unselect'
+                      <common-icons :type="isAudioAll ? 'iconcheckbox' : 'iconcheck-unselect'
                         " color="#2A4273" size="24"></common-icons>
                     </div>
                     <div class="audio-head-item" v-for="(item, index) in audioColumns" :key="index">
@@ -101,10 +104,9 @@
                     <div class="audio-table-main" v-for="(item, index) in audioTableList" :key="index">
                       <div class="table-content">
                         <div class="content-checkbox" @click="checkAudioChange(item, index)">
-                          <common-icons :type="
-                              item.isSelectAudio
-                                ? 'iconcheckbox'
-                                : 'iconcheck-unselect'
+                          <common-icons :type="item.isSelectAudio
+                              ? 'iconcheckbox'
+                              : 'iconcheck-unselect'
                             " color="#2A4273" size="24"></common-icons>
                         </div>
                         <div class="audio-table-item" style="flex: 1">
@@ -126,8 +128,7 @@
                 <div class="room-table-box">
                   <div class="table-head">
                     <div class="head-checkbox" @click="checkRoomAll">
-                      <common-icons :type="
-                          isRoomAll ? 'iconcheckbox' : 'iconcheck-unselect'
+                      <common-icons :type="isRoomAll ? 'iconcheckbox' : 'iconcheck-unselect'
                         " color="#2A4273" size="24"></common-icons>
                     </div>
                     <div class="audio-head-item" v-for="(item, index) in roomColumns" :key="index">
@@ -138,10 +139,9 @@
                     <div class="audio-table-main" v-for="(item, index) in roomTableList" :key="index">
                       <div class="table-content">
                         <div class="content-checkbox" @click="checkRoomChange(item, index)">
-                          <common-icons :type="
-                              item.isSelectRoom
-                                ? 'iconcheckbox'
-                                : 'iconcheck-unselect'
+                          <common-icons :type="item.isSelectRoom
+                              ? 'iconcheckbox'
+                              : 'iconcheck-unselect'
                             " color="#2A4273" size="24"></common-icons>
                         </div>
                         <div class="audio-table-item" style="flex: 1; padding-left: 6.88upx">
@@ -157,12 +157,15 @@
                           {{ item.volume }}
                         </div>
                         <div class="audio-table-item" style="flex: 1">
-                          <div class="control-button" v-if="audioStatus">
-                            <image class="image-button" v-if="item.pause" src="@/static/images/common/button/stoped.png" @click="handlePauseChange(item)"></image>
-                            <image class="image-button" v-else src="@/static/images/common/button/started.png" @click="handlePauseChange(item)"></image>
+                          <div class="control-button" v-if="audioState">
+                            <image class="image-button" v-if="item.pause" src="@/static/images/common/button/stoped.png"
+                              @click="handlePauseChange(item)"></image>
+                            <image class="image-button" v-else src="@/static/images/common/button/started.png"
+                              @click="handlePauseChange(item)"></image>
                           </div>
                           <div class="delete-button" v-else>
-                            <image class="image-button" src="@/static/images/common/button/removed.png" @click="handleDeleteRoom(item, index)"></image>
+                            <image class="image-button" src="@/static/images/common/button/removed.png"
+                              @click="handleDeleteRoom(item, index)"></image>
                           </div>
                         </div>
                       </div>
@@ -186,7 +189,7 @@
       <neil-modal :show="showAudioConfirm" @close="closeModal('AudioConfirm')">
         <div class="audio-modal-container">
           <div class="neil-modal-label">
-            确认{{ audioStatus ? "关闭" : "播放" }}音频？
+            确认{{ audioState ? "关闭" : "播放" }}音频？
           </div>
           <div class="neil-modal-btn">
             <div class="cancel-btn" @click="closeModal('AudioConfirm')">
@@ -275,7 +278,7 @@ export default {
     vTree,
     commonIcons,
   },
-  data () {
+  data() {
     return {
       // 分机列表
       terminalList: {},
@@ -300,7 +303,7 @@ export default {
       // 全选音频
       isAudioAll: false,
       // 分机状态
-      audioStatus: false,
+      audioState: false,
       // 监区名称
       rootName: "",
       // 监室名称
@@ -337,13 +340,7 @@ export default {
       totalPage: 1,
     };
   },
-  computed: {
-    // 禁止选择状态
-    disabledSelect () {
-      return this.audioStatus;
-    },
-  },
-  created () {
+  created() {
     // 获取分机列表
     this.getTerminalInfo();
     // 获取分组列表
@@ -353,22 +350,26 @@ export default {
     // 获取动态列表
     this.getDynamicInfo();
   },
-  mounted () {
+  mounted() {
     // 获取音频播放状态信息
-    this.getAudioStatusInfo();
+    this.getAudioStatusInfo("300");
   },
   methods: {
     // 切换分机|分组列表
-    handleTabChange (page) {
+    handleTabChange(page) {
+      if (this.audioState) {
+        this.$parent.handleShowToast("请先停止播放音频", "center", 5000);
+        return;
+      }
       this.page = page;
     },
     // 获取分机列表
-    async getTerminalInfo () {
-      let areaId = uni.getStorageSync("controlInfo").areaId;
+    async getTerminalInfo() {
+      const { areaId } = uni.getStorageSync("controlInfo");
       let res = await Api.apiCall("get", Api.index.getRoomByAreaId, {
         id: areaId,
       });
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         let result = [];
         res.data.map((item) => {
           if (!!item) {
@@ -380,12 +381,12 @@ export default {
       }
     },
     // 获取分组列表
-    async getGroupList () {
+    async getGroupList() {
       let controlId = uni.getStorageSync("controlInfo").id;
       let res = await Api.apiCall("get", Api.index.getGroupList, {
         controlId: controlId,
       });
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         let result = [];
         res.data.map((item) => {
           if (!!item) {
@@ -397,19 +398,19 @@ export default {
       }
     },
     // 获取音频动态列表
-    async getDynamicInfo () {
+    async getDynamicInfo() {
       let controlId = uni.getStorageSync("controlInfo").id;
       let params = {
         controlId: controlId,
         type: "300",
       };
       let res = await Api.apiCall("get", Api.index.getDynamicInfo, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         this.messageList = res.data;
       }
     },
     // 获取所有音频列表
-    async getAudioInfo (index) {
+    async getAudioInfo(index) {
       let params = {
         pageParam: {
           pageIndex: index,
@@ -417,7 +418,7 @@ export default {
         },
       };
       let res = await Api.apiCall("post", Api.index.getAudioInfos, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         this.totalPage = res.page.totalPage;
         let result = res.data;
         if (result.length) {
@@ -432,22 +433,22 @@ export default {
       }
     },
     // 下拉刷新
-    scrollToLower (e) {
+    scrollToLower(e) {
       if (this.pageIndex < this.totalPage) {
         this.pageIndex++;
         this.getAudioInfo(this.pageIndex);
       }
     },
     // 切换监室|音频列表
-    handlePageChange (tab) {
+    handlePageChange(tab) {
       this.currentPage = tab;
     },
     // 搜索分机监室
-    searchTerminalChange (e) {
+    searchTerminalChange(e) {
       this.searchTerminal = e.detail.value;
     },
     // 搜索分机监室
-    searchTerminalRoom () {
+    searchTerminalRoom() {
       if (!this.searchTerminal) {
         this.$parent.handleShowToast("请输入搜索内容", "center");
         return;
@@ -473,7 +474,7 @@ export default {
           }
         });
       });
-      if (!!Object.keys(roomItem).length) {
+      if (Object.keys(roomItem).length) {
         this.roomTableList.push(roomItem);
         this.roomTableList = unique(this.roomTableList);
         this.roomTableList.map((item, index) => {
@@ -492,11 +493,11 @@ export default {
       this.roomSelectList = this.roomTableList;
     },
     // 搜索分组监室
-    searchGroupChange (e) {
+    searchGroupChange(e) {
       this.searchGroup = e.detail.value;
     },
     // 搜索分组监室
-    searchGroupRoom () {
+    searchGroupRoom() {
       if (!this.searchGroup) {
         this.$parent.handleShowToast("请输入搜索内容", "center");
         return;
@@ -532,7 +533,7 @@ export default {
           }
         });
       });
-      if (!!Object.keys(roomItem).length) {
+      if (Object.keys(roomItem).length) {
         this.roomTableList.push(roomItem);
         this.roomTableList = unique(this.roomTableList);
         this.roomTableList.map((item, index) => {
@@ -551,7 +552,7 @@ export default {
       this.roomSelectList = this.roomTableList;
     },
     // 选择分机列表
-    terminalSelect (list) {
+    terminalSelect(list) {
       list.map((item) => {
         item.status = "1";
         item.pause = false;
@@ -569,7 +570,7 @@ export default {
       this.roomSelectList = this.roomTableList;
     },
     // 选择分组列表
-    groupSelect (list) {
+    groupSelect(list) {
       list.map((item) => {
         item.status = "1";
         item.pause = false;
@@ -599,7 +600,7 @@ export default {
         });
       }
       this.roomTableList = list;
-      this.roomTableList = uniqueArr(this.roomTableList);
+      this.roomTableList = uniqueArr(this.roomTableList, "name");
       if (!list.length) {
         this.isRoomAll = false;
       } else {
@@ -611,7 +612,7 @@ export default {
       this.roomSelectList = this.roomTableList;
     },
     // 全选音频|监室
-    handleSelectAll () {
+    handleSelectAll() {
       if (!this.currentPage) {
         // 全选音频
         if (!this.audioTableList.length) {
@@ -651,8 +652,8 @@ export default {
       }
     },
     // 全选音频表格行
-    checkAudioAll () {
-      if (this.audioStatus) {
+    checkAudioAll() {
+      if (this.audioState) {
         this.$parent.handleShowToast("请先停止分机播放", "center");
         return;
       }
@@ -675,7 +676,7 @@ export default {
       }
     },
     // 移除已选择监室
-    handleRemoveAll () {
+    handleRemoveAll() {
       this.isRoomAll = false;
       this.roomTableList = [];
       this.roomSelectList = [];
@@ -697,8 +698,8 @@ export default {
       }
     },
     // 选择音频表格行
-    checkAudioChange (audio, index) {
-      if (this.audioStatus) {
+    checkAudioChange(audio, index) {
+      if (this.audioState) {
         this.$parent.handleShowToast("请先停止分机播放", "center");
         return;
       }
@@ -723,7 +724,7 @@ export default {
       this.selectSongNum = this.audioSelectList.length;
     },
     // 全选监室表格行
-    checkRoomAll () {
+    checkRoomAll() {
       if (!this.roomTableList.length) {
         return;
       }
@@ -741,7 +742,7 @@ export default {
       }
     },
     // 选择监室表格行
-    checkRoomChange (room, index) {
+    checkRoomChange(room, index) {
       this.roomSelectList = [];
       if (room.isSelectRoom) {
         room.isSelectRoom = false;
@@ -762,9 +763,9 @@ export default {
       }
     },
     // 表格移除监室
-    handleDeleteRoom (room, idx) {
+    handleDeleteRoom(room, idx) {
       this.roomTableList.splice(idx, 1);
-      if (!!this.roomSelectList.length) {
+      if (this.roomSelectList.length) {
         this.roomSelectList.map((item, index) => {
           if (item.id == room.id) {
             this.roomSelectList.splice(index, 1);
@@ -781,7 +782,7 @@ export default {
       }
     },
     // 表格移除监室方法
-    handleRemoveRoom (list, room) {
+    handleRemoveRoom(list, room) {
       list.children.map((data) => {
         data.children.map((item, index) => {
           if (item.name == room.name) {
@@ -793,7 +794,7 @@ export default {
       });
     },
     // 打开分机弹框
-    handleAudioModal () {
+    handleAudioModal() {
       if (!this.audioSelectList.length) {
         this.$parent.handleShowToast("请先选择音频", "center");
         return;
@@ -805,21 +806,15 @@ export default {
       this.showAudioConfirm = true;
     },
     // 播放分机音频
-    handleOpenAudio () {
+    handleOpenAudio() {
       this.showAudioConfirm = false;
-      this.audioStatus = !this.audioStatus;
-      let controlCode = uni.getStorageSync("controlInfo").code;
+      this.audioState = !this.audioState;
+      const { controlCode } = uni.getStorageSync("controlInfo");
       let terminalCode = this.roomSelectList
-        .map((item) => {
-          return item.terminalCode;
-        })
-        .join(",");
+        .map((item) => item.terminalCode)
+        .toString();
       this.rootName = this.roomSelectList[0].rootName;
-      this.prisonName = this.roomSelectList
-        .map((item) => {
-          return item.name;
-        })
-        .join(",");
+      this.prisonName = this.roomSelectList.map((item) => item.name).toString();
       let audioList = [];
       this.audioSelectList.map((item) => {
         let obj = {
@@ -828,7 +823,7 @@ export default {
         };
         audioList.push(obj);
       });
-      if (this.audioStatus) {
+      if (this.audioState) {
         // 开始播放音频
         let controlObj = {
           maindevno: controlCode,
@@ -839,14 +834,12 @@ export default {
             audioList: audioList,
           },
         };
-        this.$parent.sendWebsocket(JSON.stringify(controlObj));
-        let params = {
-          controlId: uni.getStorageSync("controlInfo").id,
-          type: "300",
-          content: `开始播放${this.prisonName}音频`,
-          operationTime: dateFormat("YYYY-MM-DD", new Date()),
-        };
-        this.setDynamicInfo(params);
+        this.getAudioStatusInfo("200");
+        this.getAudioStatusInfo("400");
+        setTimeout(() => {
+          this.$parent.sendWebsocket(JSON.stringify(controlObj));
+          this.setDynamicInfo("300", `开始播放${this.prisonName}音频`);
+        }, 0);
         setTimeout(() => {
           // 保存音频播放状态
           this.saveAudioPlayStatus("start");
@@ -858,34 +851,29 @@ export default {
       }
     },
     // 停止播放音频
-    hanleStopAudio () {
-      let controlCode = uni.getStorageSync("controlInfo").code;
+    hanleStopAudio() {
+      const { controlCode } = uni.getStorageSync("controlInfo");
       let terminalCode = this.roomSelectList
-        .map((item) => {
-          return item.terminalCode;
-        })
-        .join(",");
+        .map((item) => item.terminalCode)
+        .toString();
       this.$parent.sendWebsocket(
         `{maindevno:"${controlCode}",devno:"${terminalCode}",type:"300",msg:"1"}`
       );
-      let params = {
-        controlId: uni.getStorageSync("controlInfo").id,
-        type: "300",
-        content: `停止播放${this.prisonName}音频`,
-        operationTime: dateFormat("YYYY-MM-DD", new Date()),
-      };
-      this.setDynamicInfo(params);
+      this.setDynamicInfo("300", `停止播放${this.prisonName}音频`);
       // 保存音频播放状态
       this.saveAudioPlayStatus("stop");
     },
     // 新增音频操作动态
-    async setDynamicInfo (params) {
+    async setDynamicInfo(type, content) {
+      let controlId = uni.getStorageSync("controlInfo").id;
+      let operationTime = dateFormat("YYYY-MM-DD", new Date());
+      let params = { controlId, type, content, operationTime };
       let res = await Api.apiCall(
         "post",
-        Api.index.setDynamicInfo,
+        Api.index.saveDynamicInfo,
         JSON.stringify(params)
       );
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         // 刷新动态信息
         this.getDynamicInfo();
       } else {
@@ -893,8 +881,8 @@ export default {
       }
     },
     // 保存音频播放状态
-    async saveAudioPlayStatus (status) {
-      let controlCode = uni.getStorageSync("controlInfo").code;
+    async saveAudioPlayStatus(status) {
+      const { controlCode } = uni.getStorageSync("controlInfo");
       let params = {
         data: {
           controlCode,
@@ -919,48 +907,64 @@ export default {
       }
     },
     // 获取音频播放状态信息
-    async getAudioStatusInfo () {
-      let controlCode = uni.getStorageSync("controlInfo").code;
+    async getAudioStatusInfo(type) {
+      const { controlCode } = uni.getStorageSync("controlInfo");
       let params = {
         controlCode,
-        type: "300",
+        type,
       };
       let res = await Api.apiCall("get", Api.index.getMediaStatusInfo, params);
       if (res.state.code == 200) {
         if (res.data.roomList.length) {
-          this.audioTableList = res.data.mediaList;
-          this.audioStatus = res.data.status;
-          this.roomTableList = res.data.roomList;
-          this.roomSelectList = this.roomTableList;
-          this.audioTableList.forEach((audio) => {
-            if (audio.isSelectAudio) {
-              this.audioSelectList.push(audio);
-            }
-          });
-          if (this.audioSelectList.length == this.audioTableList.length) {
-            this.isAudioAll = true;
-          } else {
-            this.isAudioAll = false;
-          }
-          this.selectSongNum = this.audioSelectList.length;
-          this.isRoomAll = true;
-          this.terminalList.children.map((list) => {
-            if (this.roomTableList.length == list.children.length) {
-              list._checked = true;
-            }
-            list.children.map((item) => {
-              this.roomTableList.forEach((room) => {
-                if (item.terminalCode == room.terminalCode) {
-                  item._checked = true;
+          switch (type) {
+            case "200":
+              let radioRoomName = res.data.roomList
+                .map((item) => item.name)
+                .toString();
+              this.setDynamicInfo("200", `停止${radioRoomName}广播`);
+              break;
+            case "300":
+              this.audioTableList = res.data.mediaList;
+              this.audioState = res.data.status == "start" ? true : false;
+              this.roomTableList = res.data.roomList;
+              this.roomSelectList = this.roomTableList;
+              this.audioTableList.forEach((audio) => {
+                if (audio.isSelectAudio) {
+                  this.audioSelectList.push(audio);
                 }
               });
-            });
-          });
+              if (this.audioSelectList.length == this.audioTableList.length) {
+                this.isAudioAll = true;
+              } else {
+                this.isAudioAll = false;
+              }
+              this.selectSongNum = this.audioSelectList.length;
+              this.isRoomAll = true;
+              this.terminalList.children.map((list) => {
+                if (this.roomTableList.length == list.children.length) {
+                  list._checked = true;
+                }
+                list.children.map((item) => {
+                  this.roomTableList.forEach((room) => {
+                    if (item.terminalCode == room.terminalCode) {
+                      item._checked = true;
+                    }
+                  });
+                });
+              });
+              break;
+            case "400":
+              let videoRoomName = res.data.roomList
+                .map((item) => item.name)
+                .toString();
+              this.setDynamicInfo("400", `停止播放${videoRoomName}视频`);
+              break;
+          }
         }
       }
     },
     // 分机连接状态
-    getConnectInfo (data) {
+    getConnectInfo(data) {
       this.roomTableList.map((item, index) => {
         data.map((res) => {
           if (res.name == item.name) {
@@ -971,7 +975,7 @@ export default {
       });
     },
     // 分机音频播放信息
-    getAudioPlayInfo (data) {
+    getAudioPlayInfo(data) {
       this.roomTableList.map((item, index) => {
         if (item.terminalCode == data.devno) {
           item.audio = data.audio;
@@ -981,7 +985,7 @@ export default {
       });
     },
     // 分机回传音量
-    terminalAudioVolume (info) {
+    terminalAudioVolume(info) {
       this.roomTableList.map((item, index) => {
         if (item.terminalCode == info.devno) {
           item.volume = info.extend;
@@ -990,8 +994,8 @@ export default {
       });
     },
     // 暂停分机音频
-    handlePauseChange (data) {
-      let controlCode = uni.getStorageSync("controlInfo").code;
+    handlePauseChange(data) {
+      const { controlCode } = uni.getStorageSync("controlInfo");
       if (data.pause) {
         // 分机播放音频
         this.roomTableList.map((item, index) => {
@@ -1017,7 +1021,7 @@ export default {
       }
     },
     // 添加分组弹框
-    handleAddGroup () {
+    handleAddGroup() {
       if (!this.roomSelectList.length) {
         this.$parent.handleShowToast("请先选择监室", "center");
         return;
@@ -1026,11 +1030,11 @@ export default {
       this.showAddGroup = true;
     },
     // 获取添加分组名称
-    addGroupChange (e) {
+    addGroupChange(e) {
       this.addGroupName = e.detail.value;
     },
     // 确认添加分组
-    addGroupConfirm () {
+    addGroupConfirm() {
       if (!this.addGroupName) {
         this.$parent.handleShowToast("请输入分组名称", "center");
         return;
@@ -1039,7 +1043,7 @@ export default {
       this.closeModal("AddGroup");
     },
     // 添加分组
-    async addGroup () {
+    async addGroup() {
       let controlId = uni.getStorageSync("controlInfo").id;
       let children = [];
       this.roomSelectList.map((item) => {
@@ -1056,23 +1060,23 @@ export default {
         children: children,
       };
       let res = await Api.apiCall("post", Api.index.addGroup, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         // 获取分组列表
         this.getGroupList();
       }
     },
     // 修改分组弹框
-    openModifyGroup (list) {
+    openModifyGroup(list) {
       this.groupId = list.id;
       this.modifyGroupName = list.name;
       this.showModifyGroup = true;
     },
     // 获取修改分组名称
-    modifyGroupChange (e) {
+    modifyGroupChange(e) {
       this.modifyGroupName = e.detail.value;
     },
     // 确认修改分组名称
-    modifyGroupConfirm () {
+    modifyGroupConfirm() {
       if (!this.modifyGroupName) {
         this.$parent.handleShowToast("请输入分组名称", "center");
         return;
@@ -1082,50 +1086,50 @@ export default {
       this.closeModal("ModifyGroup");
     },
     // 修改分组名称
-    async updateGroup () {
+    async updateGroup() {
       let params = {
         name: this.modifyGroupName,
         id: this.groupId,
       };
       let res = await Api.apiCall("post", Api.index.updateGroup, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         // 获取分组列表
         this.getGroupList();
       }
     },
     // 删除分组弹框
-    openDeleteGroup (list) {
+    openDeleteGroup(list) {
       this.groupId = list.id;
       this.showDeleteGroup = true;
     },
     // 确认删除分组
-    handleDeleteConfirm () {
+    handleDeleteConfirm() {
       this.$refs.vTree.groupChange = false;
       this.deleteGroup();
       this.closeModal("DeleteGroup");
     },
     // 删除分组
-    async deleteGroup () {
+    async deleteGroup() {
       let params = {
         data: {
           id: this.groupId,
         },
       };
       let res = await Api.apiCall("post", Api.index.deleteGroup, params);
-      if (res.state.code == "200") {
+      if (res.state.code == 200) {
         // 获取分组列表
         this.getGroupList();
       }
     },
     // 减少分机音量
-    decreaseVolume () {
+    decreaseVolume() {
       if (this.roomSelectList.length) {
         let volumeList = [];
         this.roomSelectList.forEach((item) => {
           if (Reflect.has(item, "volume")) {
             let { volume, terminalCode } = item;
             if (volume > 0) {
-              volume = volume - 20 < 0 ? 0 : volume - 20;
+              volume = volume - 20;
               volumeList.push({ volume, terminalCode });
             } else {
               volume = 0;
@@ -1138,15 +1142,14 @@ export default {
       }
     },
     // 增加分机音量
-    increaseVolume () {
+    increaseVolume() {
       if (this.roomSelectList.length) {
         let volumeList = [];
         this.roomSelectList.forEach((item) => {
           if (Reflect.has(item, "volume")) {
             let { volume, terminalCode } = item;
             if (volume < 100) {
-              volume =
-                parseInt(volume) + 20 > 100 ? 100 : parseInt(volume) + 20;
+              volume = parseInt(volume) + 20;
               volumeList.push({ volume, terminalCode });
             } else {
               volume = 100;
@@ -1159,13 +1162,9 @@ export default {
       }
     },
     // 设置分机音量消息
-    volumeHandler (volumeList) {
-      let controlCode = uni.getStorageSync("controlInfo").code;
-      let terminalCode = this.roomSelectList
-        .map((item) => {
-          return item.terminalCode;
-        })
-        .join(",");
+    volumeHandler(volumeList) {
+      const { controlCode } = uni.getStorageSync("controlInfo");
+      let terminalCode = volumeList.map((item) => item.terminalCode).toString();
       let controlObj = {
         maindevno: controlCode,
         devno: terminalCode,
@@ -1175,10 +1174,10 @@ export default {
       };
       this.$parent.sendWebsocket(JSON.stringify(controlObj));
     },
-    openModal (type) {
+    openModal(type) {
       this[`show${type}`] = true;
     },
-    closeModal (type) {
+    closeModal(type) {
       this[`show${type}`] = false;
       if (type == "ModifyGroup") {
         this.$refs.vTree.groupChange = false;
@@ -1192,5 +1191,5 @@ export default {
 </script>
 
 <style lang="less">
-@import '../../common/less/index.less';
+@import "../../common/less/index.less";
 </style>
